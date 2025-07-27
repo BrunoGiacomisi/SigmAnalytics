@@ -1,24 +1,66 @@
 import sys
 import os
+from pathlib import Path
 
-def persistent_path(relative_path):
-    # Siempre calcula la ruta desde la raíz del proyecto, incluso si está congelado
-    if getattr(sys, 'frozen', False):
-        # Si está congelado, sube dos niveles desde el ejecutable (dist/dashboard.exe)
-        base_path = os.path.dirname(os.path.dirname(sys.executable))
+def get_user_data_directory():
+    """
+    Obtiene la carpeta de datos del usuario de forma profesional.
+    Usa AppData/Local en Windows para mantener los datos separados del ejecutable.
+    """
+    user_home = Path.home()
+    
+    # En Windows: C:\Users\Usuario\AppData\Local\SigmAnalytics
+    # En otros sistemas: ~/.local/share/SigmAnalytics
+    if sys.platform == "win32":
+        app_data_dir = user_home / "AppData" / "Local" / "SigmAnalytics"
     else:
-        # Si está en desarrollo, sube dos niveles desde este archivo
-        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+        app_data_dir = user_home / ".local" / "share" / "SigmAnalytics"
+    
+    # Crear estructura de carpetas si no existe
+    app_data_dir.mkdir(parents=True, exist_ok=True)
+    (app_data_dir / "outputs").mkdir(exist_ok=True)
+    (app_data_dir / "data").mkdir(exist_ok=True)
+    (app_data_dir / "data" / "historico").mkdir(exist_ok=True)
+    
+    return app_data_dir
 
-# Rutas importadas en main
-ruta_manifesto = persistent_path("DatosManifiestoINGRESOS.xlsx")
-ruta_db_historico = persistent_path(os.path.join("..", "data", "historico"))
-ruta_grafico = persistent_path(os.path.join("outputs", "serie_temporal.png"))
-ruta_grafico_promedios = persistent_path(os.path.join("outputs", "serie_promedios.png"))
-ruta_boxplot = persistent_path(os.path.join("outputs", "boxplot_conteos.png"))
-ruta_barplot = persistent_path(os.path.join("outputs", "barplot_representados.png"))
+def get_project_root():
+    """
+    Obtiene la raíz del proyecto (para archivos que deben estar junto al ejecutable).
+    """
+    if getattr(sys, 'frozen', False):
+        # Ejecutable compilado
+        return Path(sys.executable).parent
+    else:
+        # Código fuente
+        return Path(__file__).parent.parent
 
+# Configurar directorios
+USER_DATA_DIR = get_user_data_directory()
+PROJECT_ROOT = get_project_root()
+
+# Rutas de datos del usuario (se guardan en AppData)
+CONFIG_FILE = USER_DATA_DIR / "config.json"
+HISTORICO_DIR = USER_DATA_DIR / "data" / "historico"
+GRAPHS_DIR = USER_DATA_DIR / "outputs"
+
+# Rutas del proyecto (junto al ejecutable)
+LOGO_PATH = PROJECT_ROOT / "assets" / "sigma_cargo_logo.png"
+MANIFESTO_PATH = PROJECT_ROOT / "DatosManifiestoINGRESOS.xlsx"
+
+# Rutas de gráficos específicos (nuevas rutas con nombres en mayúsculas)
+RUTA_GRAFICO = GRAPHS_DIR / "serie_temporal.png"
+RUTA_GRAFICO_PROMEDIOS = GRAPHS_DIR / "serie_promedios.png"
+RUTA_BOXPLOT = GRAPHS_DIR / "boxplot_conteos.png"
+RUTA_BARPLOT = GRAPHS_DIR / "barplot_representados.png"
+
+# Rutas antiguas (para compatibilidad temporal)
+ruta_manifesto = str(MANIFESTO_PATH)
+ruta_db_historico = str(HISTORICO_DIR)
+ruta_grafico = str(RUTA_GRAFICO)
+ruta_grafico_promedios = str(RUTA_GRAFICO_PROMEDIOS)
+ruta_boxplot = str(RUTA_BOXPLOT)
+ruta_barplot = str(RUTA_BARPLOT)
 
 # Constantes de textos y UI para dashboard
 TITULO_BOXPLOT = "Boxplot: Distribución de Operaciones"
@@ -38,18 +80,15 @@ TAMANO_POPUP = (900, 600)
 TAMANO_POPUP_IMG = (850, 550)
 
 # Configuración del logo de la empresa
-LOGO_PATH = "src/assets/sigma_cargo_logo.png"
-LOGO_SIZE = (160, 160)  # Tamaño del logo en píxeles (aumentado de 80x80 a 120x120)
-
-# Sistema de configuración persistente
-CONFIG_FILE = "config.json"
+LOGO_SIZE = (160, 160)
 
 # Configuración por defecto
 DEFAULT_CONFIG = {
-    "theme": "light",  # "light" o "dark"
-    "window_size": "1100x700",  # Tamaño de ventana por defecto
-    "window_position": None,  # Posición de ventana (se guardará automáticamente)
-    "logo_size": [160, 160]  # Tamaño del logo
+    "theme": "light",
+    "window_size": "1100x700",
+    "window_position": None,
+    "logo_size": [160, 160],
+    "data_directory": str(USER_DATA_DIR)  # Agregar ruta de datos al config
 }
 
 # Temas disponibles
@@ -58,7 +97,7 @@ THEMES = {
         "bg_color": "#f4f4f4",
         "frame_color": "#dedbd7",
         "text_color": "#002B45",
-        "title_color": "#00587A",  # Azul oscuro para títulos en modo claro
+        "title_color": "#00587A",
         "accent_color": "#00587A",
         "hover_color": "#007399",
         "success_color": "#43a047",
@@ -67,15 +106,34 @@ THEMES = {
         "stats_border": "#b0bec5"
     },
     "dark": {
-        "bg_color": "#2d2d2d",  # Fondo menos oscuro para mejor contraste
-        "frame_color": "#404040",  # Frame más claro
-        "text_color": "#e0e0e0",  # Texto más claro para mejor legibilidad
-        "title_color": "#ffffff",  # Blanco para títulos en modo oscuro
+        "bg_color": "#2d2d2d",
+        "frame_color": "#404040",
+        "text_color": "#e0e0e0",
+        "title_color": "#ffffff",
         "accent_color": "#4a9eff",
         "hover_color": "#66b3ff",
         "success_color": "#4caf50",
         "error_color": "#f44336",
-        "stats_bg": "#4a4a4a",  # Fondo de estadísticas más claro
-        "stats_border": "#666666"  # Borde más claro
+        "stats_bg": "#4a4a4a",
+        "stats_border": "#666666"
     }
 }
+
+def show_data_directory_info():
+    """
+    Retorna información sobre dónde se guardan los datos para mostrar al usuario.
+    """
+    return f"""
+📁 **Ubicación de datos de SigmAnalytics:**
+
+**Configuración y datos:**
+{USER_DATA_DIR}
+
+**Subcarpetas:**
+• Configuración: {USER_DATA_DIR}
+• Datos históricos: {HISTORICO_DIR}
+• Gráficos generados: {GRAPHS_DIR}
+
+**Nota:** Los datos se guardan automáticamente en tu carpeta de usuario.
+No necesitas crear estas carpetas manualmente.
+"""

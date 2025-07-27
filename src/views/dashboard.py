@@ -1,8 +1,13 @@
 import customtkinter as ctk  # Librería para una interfaz gráfica moderna basada en tkinter
 from tkinter import filedialog, messagebox  # Utilidades para abrir archivos y mostrar mensajes emergentes
 from src import main  # Se importa el módulo principal que procesa el archivo
-from src.config import ruta_grafico_promedios
-from src.config import TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS, MENSAJE_ARCHIVO_INVALIDO, MENSAJE_PROCESAMIENTO_EXITOSO, MENSAJE_PROCESAMIENTO_ERROR, MENSAJE_ARCHIVO_VALIDO, MENSAJE_ARCHIVO_INVALIDO_ICONO, MENSAJE_ERROR_LECTURA, COLOR_EXITO, COLOR_ERROR, COLOR_TITULO, TAMANO_IMAGEN, TAMANO_POPUP, TAMANO_POPUP_IMG, LOGO_PATH, LOGO_SIZE
+from src.config import (
+    RUTA_GRAFICO_PROMEDIOS, TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS,
+    MENSAJE_ARCHIVO_INVALIDO, MENSAJE_PROCESAMIENTO_EXITOSO, MENSAJE_PROCESAMIENTO_ERROR,
+    MENSAJE_ARCHIVO_VALIDO, MENSAJE_ARCHIVO_INVALIDO_ICONO, MENSAJE_ERROR_LECTURA,
+    COLOR_EXITO, COLOR_ERROR, COLOR_TITULO, TAMANO_IMAGEN, TAMANO_POPUP, TAMANO_POPUP_IMG,
+    LOGO_PATH, LOGO_SIZE, show_data_directory_info
+)
 from src.representados import CODIGOS_REPRESENTADOS 
 from src.models.config_manager import config_manager
 from src.models.theme_manager import theme_manager
@@ -75,6 +80,55 @@ def crear_dashboard():
         # Actualizar texto del botón
         boton_tema.configure(text=f"🌙 Modo {theme_manager.get_theme_name()}")
 
+    def mostrar_info_datos():
+        """Muestra información sobre dónde se guardan los datos."""
+        info = show_data_directory_info()
+        
+        # Crear ventana de información
+        info_window = ctk.CTkToplevel(ventana)
+        info_window.title("📁 Ubicación de Datos - SigmAnalytics")
+        info_window.geometry("600x400")
+        info_window.resizable(False, False)
+        
+        # Centrar la ventana
+        info_window.transient(ventana)
+        info_window.grab_set()
+        
+        # Frame principal
+        frame_info = ctk.CTkFrame(info_window, corner_radius=15)
+        frame_info.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Título
+        titulo = ctk.CTkLabel(
+            frame_info, 
+            text="📁 Ubicación de Datos", 
+            font=("Segoe UI", 20, "bold"),
+            text_color=theme_manager.get_current_theme_colors()['accent_color']
+        )
+        titulo.pack(pady=(20, 10))
+        
+        # Información
+        info_text = ctk.CTkTextbox(
+            frame_info,
+            width=550,
+            height=250,
+            font=("Segoe UI", 12),
+            wrap="word"
+        )
+        info_text.pack(pady=10, padx=20)
+        info_text.insert("1.0", info)
+        info_text.configure(state="disabled")
+        
+        # Botón cerrar
+        boton_cerrar = ctk.CTkButton(
+            frame_info,
+            text="✅ Entendido",
+            command=info_window.destroy,
+            fg_color=theme_manager.get_current_theme_colors()['accent_color'],
+            hover_color=theme_manager.get_current_theme_colors()['hover_color']
+        )
+        boton_cerrar.pack(pady=20)
+
     def guardar_configuracion_ventana():
         """Guarda la configuración de la ventana cuando se cierra."""
         try:
@@ -98,7 +152,7 @@ def crear_dashboard():
     frame_principal.grid(row=0, column=0, sticky="ew", padx=30, pady=20)
     theme_widgets['frame_principal'] = frame_principal
 
-    # Frame para el header (logo + título + botón de tema)
+    # Frame para el header (logo + título + botones)
     header_frame = ctk.CTkFrame(master=frame_principal, fg_color="transparent")
     header_frame.pack(pady=(10, 15), fill="x", padx=20)
     
@@ -114,16 +168,36 @@ def crear_dashboard():
     titulo.pack(side="left", pady=10)
     theme_widgets['titulo'] = titulo
 
-    # Botón para cambiar tema (a la derecha)
+    # Frame para botones (a la derecha)
+    botones_frame = ctk.CTkFrame(master=header_frame, fg_color="transparent")
+    botones_frame.pack(side="right", padx=(0, 10))
+    
+    # Botón de información de datos
+    boton_info_datos = ctk.CTkButton(
+        master=botones_frame,
+        text="📁 Datos",
+        command=mostrar_info_datos,
+        width=80,
+        height=32,
+        font=("Segoe UI", 11),
+        fg_color=theme_manager.get_current_theme_colors()['accent_color'],
+        hover_color=theme_manager.get_current_theme_colors()['hover_color']
+    )
+    boton_info_datos.pack(side="left", padx=(0, 10))
+    theme_widgets['boton_info_datos'] = boton_info_datos
+    
+    # Botón para cambiar tema
     boton_tema = ctk.CTkButton(
-        master=header_frame,
+        master=botones_frame,
         text=f"🌙 Modo {theme_manager.get_theme_name()}",
         command=cambiar_tema,
         width=120,
         height=32,
-        font=("Segoe UI", 11)
+        font=("Segoe UI", 11),
+        fg_color=theme_manager.get_current_theme_colors()['accent_color'],
+        hover_color=theme_manager.get_current_theme_colors()['hover_color']
     )
-    boton_tema.pack(side="right", padx=(0, 10))
+    boton_tema.pack(side="left")
     theme_widgets['boton_tema'] = boton_tema
 
     # Variable para mostrar el nombre del archivo seleccionado
@@ -198,9 +272,8 @@ def crear_dashboard():
     theme_widgets['valor_viajes_label'] = valor_viajes_label
 
     # Mensaje de histórico actualizado
-    valor_historial = ctk.StringVar(value="")
-    label_historial = ctk.CTkLabel(master=stats_card, textvariable=valor_historial, font=("Segoe UI", 12), text_color="#333333", anchor="w", justify="left")
-    label_historial.pack(padx=10, pady=(0, 5), anchor="w")
+    label_historial = ctk.CTkLabel(master=frame_principal, text="", font=("Segoe UI", 11), text_color="#607d8b")
+    label_historial.pack(pady=(0, 10), anchor="w", padx=10)
     theme_widgets['label_historial'] = label_historial
 
     def validar_y_cargar_archivo(ruta_archivo: str) -> pd.DataFrame:
@@ -224,7 +297,7 @@ def crear_dashboard():
         valor_otros.set(f"{mediana_otros:.2f} (mediana) | {promedio_otros:.2f} (promedio)")
         valor_participacion.set(f"{participacion:.2f}%")
         valor_viajes.set(f"{viajes_representados}")
-        valor_historial.set("✓ Histórico actualizado." if actualizado else "ℹ Ya existía un registro para ese período.")
+        label_historial.configure(text="✓ Histórico actualizado." if actualizado else "ℹ Ya existía un registro para ese período.")
 
     # Muestra una imagen desde una ruta en el label correspondiente
     def mostrar_imagen(ruta: str, etiqueta: ctk.CTkLabel) -> None:
@@ -234,6 +307,8 @@ def crear_dashboard():
             imagen_tk = ImageTk.PhotoImage(img)
             etiqueta.configure(image=imagen_tk)
             etiqueta.image = imagen_tk  # Guarda la referencia para que no se borre
+        else:
+            etiqueta.configure(image="", text="Gráfico no disponible")
 
     # Función para mostrar imagen ampliada en popup
     def mostrar_imagen_ampliada(ruta: str) -> None:
@@ -252,6 +327,8 @@ def crear_dashboard():
             etiqueta_img.image = imagen_tk
             etiqueta_img.pack(padx=10, pady=10)
             ventana_popup.after(500, lambda: ventana_popup.attributes('-topmost', False))
+        else:
+            messagebox.showerror("Error", "No se encontró la imagen para ampliar.")
 
     # Función que se ejecuta cuando el usuario presiona el botón
     def ejecutar_procesamiento() -> None:
@@ -282,7 +359,7 @@ def crear_dashboard():
                 actualizar_panel_resultados(mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, viajes_representados, actualizado)
                 mostrar_imagen(ruta_boxplot_periodo, etiqueta_imagen_boxplot)
                 mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
-                mostrar_imagen(ruta_grafico_promedios, etiqueta_imagen_promedios)
+                mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
                 set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
                 if es_preview:
                     feedback_icon.set("ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
@@ -318,6 +395,7 @@ def crear_dashboard():
     frame_graficos_outer = ctk.CTkFrame(master=ventana, fg_color="#f4f4f4")
     frame_graficos_outer.grid(row=1, column=0, sticky="nsew")
     frame_graficos_outer.grid_columnconfigure(0, weight=1)
+    theme_widgets['frame_graficos_outer'] = frame_graficos_outer
 
     # Frame de gráficos con ancho máximo
     frame_graficos = ctk.CTkFrame(master=frame_graficos_outer, corner_radius=20, fg_color="#f4f4f4", width=900)
@@ -368,7 +446,7 @@ def crear_dashboard():
     boton_ampliar_barras.grid(row=2, column=1, pady=(5, 10), sticky="n")
     theme_widgets['boton_ampliar_barras'] = boton_ampliar_barras
     
-    boton_ampliar_promedios = ctk.CTkButton(master=frame_graficos, text="Ampliar", width=80, command=lambda: mostrar_imagen_ampliada(ruta_grafico_promedios))
+    boton_ampliar_promedios = ctk.CTkButton(master=frame_graficos, text="Ampliar", width=80, command=lambda: mostrar_imagen_ampliada(RUTA_GRAFICO_PROMEDIOS))
     boton_ampliar_promedios.grid(row=2, column=2, pady=(5, 10), sticky="n")
     theme_widgets['boton_ampliar_promedios'] = boton_ampliar_promedios
 
