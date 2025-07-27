@@ -1,6 +1,6 @@
 # Assets - Recursos del Sistema
 
-Esta carpeta contiene los recursos gráficos y archivos estáticos del sistema SigmAnalitics.
+Esta carpeta contiene los recursos gráficos y archivos estáticos del sistema SigmAnalytics.
 
 ## Logo de la Empresa
 

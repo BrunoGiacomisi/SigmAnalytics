@@ -32,7 +32,7 @@ def crear_dashboard():
     ctk.set_default_color_theme("blue")  # Tema azul por defecto
 
     ventana = ctk.CTk()  # Se instancia la ventana principal
-    ventana.title("SigmAnalitics")  # Título de la ventana
+    ventana.title("SigmAnalytics")  # Título de la ventana
     
     # Aplicar tamaño y posición guardados
     ventana.geometry(saved_window_size)
@@ -108,7 +108,7 @@ def crear_dashboard():
 
     # Título simplificado (sin el nombre de la empresa)
     titulo = ctk.CTkLabel(master=header_frame,
-                          text="SigmAnalitics",
+                          text="SigmAnalytics",
                           font=("Segoe UI", 22, "bold"),
                           text_color="#002B45")
     titulo.pack(side="left", pady=10)

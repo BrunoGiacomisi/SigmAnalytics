@@ -1,4 +1,4 @@
-# SigmAnalitics - Sistema de Análisis de Manifiestos
+# SigmAnalytics - Sistema de Análisis de Manifiestos
 
 Sistema de análisis y visualización de datos de manifiestos para SIGMA CARGO, desarrollado en Python con interfaz gráfica moderna.
 
@@ -23,7 +23,7 @@ Sistema de análisis y visualización de datos de manifiestos para SIGMA CARGO, 
 
    ```bash
    git clone [URL_DEL_REPOSITORIO]
-   cd SigmAnalitics
+   cd SigmAnalytics
    ```
 
 2. **Crear entorno virtual:**
@@ -56,7 +56,7 @@ python -m src.main
 ## 📁 Estructura del Proyecto
 
 ```
-SigmAnalitics/
+SigmAnalytics/
 ├── src/
 │   ├── main.py              # Punto de entrada principal
 │   ├── config.py            # Configuraciones y constantes
