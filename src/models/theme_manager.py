@@ -4,18 +4,18 @@ from src.config import THEMES
 from src.models.config_manager import config_manager
 
 class ThemeManager:
-    """Manejador de temas del sistema."""
+    # Manejador de temas del sistema.
     
     def __init__(self):
         self.current_theme = config_manager.get_theme()
         self.themes = THEMES
     
     def get_current_theme_colors(self) -> Dict[str, str]:
-        """Obtiene los colores del tema actual."""
+        # Obtiene los colores del tema actual.
         return self.themes.get(self.current_theme, self.themes["light"])
     
     def apply_theme(self, theme: str, widgets: Dict[str, Any] = None) -> bool:
-        """Aplica un tema al sistema."""
+        # Aplica un tema al sistema.
         if theme not in self.themes:
             return False
         
@@ -35,7 +35,7 @@ class ThemeManager:
         return True
     
     def update_widget_colors(self, widgets: Dict[str, Any]) -> None:
-        """Actualiza los colores de los widgets según el tema actual."""
+        # Actualiza los colores de los widgets según el tema actual.
         colors = self.get_current_theme_colors()
         
         # Actualizar colores de widgets específicos
@@ -97,13 +97,13 @@ class ThemeManager:
                     pass
     
     def toggle_theme(self, widgets: Dict[str, Any] = None) -> str:
-        """Cambia entre tema claro y oscuro."""
+        # Cambia entre tema claro y oscuro.
         new_theme = "dark" if self.current_theme == "light" else "light"
         self.apply_theme(new_theme, widgets)
         return new_theme
     
     def get_theme_name(self) -> str:
-        """Obtiene el nombre del tema actual."""
+        # Obtiene el nombre del tema actual.
         return "Oscuro" if self.current_theme == "dark" else "Claro"
 
 # Instancia global del theme manager

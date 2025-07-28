@@ -6,7 +6,7 @@ import sys
 import os
 
 def resource_path(relative_path):
-    """Obtiene la ruta absoluta al recurso, compatible con PyInstaller."""
+    # Obtiene la ruta absoluta al recurso, compatible con PyInstaller.
     try:
         # PyInstaller crea una carpeta temporal y almacena el path en _MEIPASS
         base_path = sys._MEIPASS

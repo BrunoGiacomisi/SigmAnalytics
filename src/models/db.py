@@ -97,13 +97,11 @@ def obtener_todos_los_periodos() -> pd.DataFrame:
 # Función alias (por ahora) que llama a la misma que obtener_todos_los_periodos()
 # -------------------------------------------------------------------------
 def obtener_historico_completo() -> pd.DataFrame:
-    """Función alias que llama a obtener_todos_los_periodos()."""
+    # Función alias que llama a obtener_todos_los_periodos().
     return obtener_todos_los_periodos()
 
 def get_periodo_mas_reciente() -> Optional[str]:
-    """
-    Devuelve el periodo más reciente registrado en la base de datos, o None si no hay registros.
-    """
+    # Devuelve el periodo más reciente registrado en la base de datos, o None si no hay registros.
     conexion = sqlite3.connect(DB_PATH)
     cursor = conexion.cursor()
     cursor.execute("SELECT MAX(periodo) FROM historico")

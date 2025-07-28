@@ -57,31 +57,36 @@ def crear_dashboard():
     # --- Funciones auxiliares para separar responsabilidades ---
     
     def cargar_logo_empresa(master_frame) -> ctk.CTkLabel:
-        """Carga y muestra el logo de la empresa. Retorna un placeholder si no se encuentra."""
+        # Carga y muestra el logo de la empresa. Retorna un placeholder si no se encuentra.
         try:
-            logo_path = resource_path(LOGO_PATH)
-            if os.path.exists(logo_path):
-                logo_img = Image.open(logo_path)
+            # Usar directamente LOGO_PATH que ya tiene la ruta completa correcta
+            print(f"Intentando cargar logo desde: {LOGO_PATH}")
+            if os.path.exists(LOGO_PATH):
+                print(f"Logo encontrado, cargando...")
+                logo_img = Image.open(LOGO_PATH)
                 logo_img.thumbnail(LOGO_SIZE)
                 logo_photo = ImageTk.PhotoImage(logo_img)
                 logo_label = ctk.CTkLabel(master=master_frame, image=logo_photo, text="")
                 logo_label.image = logo_photo  # Mantener referencia
+                print(f"Logo cargado exitosamente")
                 return logo_label
             else:
                 # Logo no encontrado, mostrar placeholder más grande
+                print(f"Logo no encontrado en: {LOGO_PATH}")
                 return ctk.CTkLabel(master=master_frame, text="🏢", font=("Segoe UI", 60), text_color="#002B45")
         except Exception as e:
             # Error al cargar logo, mostrar placeholder más grande
+            print(f"Error al cargar logo: {e}")
             return ctk.CTkLabel(master=master_frame, text="🏢", font=("Segoe UI", 60), text_color="#002B45")
 
     def cambiar_tema():
-        """Función para cambiar entre tema claro y oscuro."""
+        # Función para cambiar entre tema claro y oscuro.
         nuevo_tema = theme_manager.toggle_theme(theme_widgets)
         # Actualizar texto del botón
         boton_tema.configure(text=f"🌙 Modo {theme_manager.get_theme_name()}")
 
     def mostrar_info_datos():
-        """Muestra información sobre dónde se guardan los datos."""
+        # Muestra información sobre dónde se guardan los datos.
         info = show_data_directory_info()
         
         # Crear ventana de información
@@ -130,7 +135,7 @@ def crear_dashboard():
         boton_cerrar.pack(pady=20)
 
     def guardar_configuracion_ventana():
-        """Guarda la configuración de la ventana cuando se cierra."""
+        # Guarda la configuración de la ventana cuando se cierra.
         try:
             # Obtener tamaño y posición actual
             width = ventana.winfo_width()
@@ -277,7 +282,7 @@ def crear_dashboard():
     theme_widgets['label_historial'] = label_historial
 
     def validar_y_cargar_archivo(ruta_archivo: str) -> pd.DataFrame:
-        """Valida y carga el archivo Excel, lanza ValueError si no es válido."""
+        # Valida y carga el archivo Excel, lanza ValueError si no es válido.
         df: pd.DataFrame = pd.read_excel(ruta_archivo).rename(columns=lambda x: x.strip())
         columnas_esperadas = {"Ag.transportista", "Nombre Ag.Transportista"}
         if not columnas_esperadas.issubset(set(df.columns)):
@@ -382,7 +387,7 @@ def crear_dashboard():
 
     # Botón para ejecutar el procesamiento del archivo (debe ir después de definir ejecutar_procesamiento)
     boton = ctk.CTkButton(master=frame_principal,
-                          text="Procesar manifiesto",
+                          text="Seleccionar archivo y procesar manifiesto",
                           command=ejecutar_procesamiento,  # Acción al hacer click
                           fg_color="#00587A",
                           hover_color="#007399",

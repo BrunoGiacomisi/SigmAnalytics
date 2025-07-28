@@ -3,10 +3,8 @@ import os
 from pathlib import Path
 
 def get_user_data_directory():
-    """
-    Obtiene la carpeta de datos del usuario de forma profesional.
-    Usa AppData/Local en Windows para mantener los datos separados del ejecutable.
-    """
+    # Obtiene la carpeta de datos del usuario de forma profesional.
+    # Usa AppData/Local en Windows para mantener los datos separados del ejecutable.
     user_home = Path.home()
     
     # En Windows: C:\Users\Usuario\AppData\Local\SigmAnalytics
@@ -25,9 +23,7 @@ def get_user_data_directory():
     return app_data_dir
 
 def get_project_root():
-    """
-    Obtiene la raíz del proyecto (para archivos que deben estar junto al ejecutable).
-    """
+    # Obtiene la raíz del proyecto (para archivos que deben estar junto al ejecutable).
     if getattr(sys, 'frozen', False):
         # Ejecutable compilado
         return Path(sys.executable).parent
@@ -45,7 +41,7 @@ HISTORICO_DIR = USER_DATA_DIR / "data" / "historico"
 GRAPHS_DIR = USER_DATA_DIR / "outputs"
 
 # Rutas del proyecto (junto al ejecutable)
-LOGO_PATH = PROJECT_ROOT / "assets" / "sigma_cargo_logo.png"
+LOGO_PATH = PROJECT_ROOT / "src" / "assets" / "sigma_cargo_logo.png"
 MANIFESTO_PATH = PROJECT_ROOT / "DatosManifiestoINGRESOS.xlsx"
 
 # Rutas de gráficos específicos (nuevas rutas con nombres en mayúsculas)
@@ -120,20 +116,18 @@ THEMES = {
 }
 
 def show_data_directory_info():
-    """
-    Retorna información sobre dónde se guardan los datos para mostrar al usuario.
-    """
+    # Retorna información sobre dónde se guardan los datos para mostrar al usuario.
     return f"""
-📁 **Ubicación de datos de SigmAnalytics:**
+📁 Ubicación de datos de SigmAnalytics:
 
-**Configuración y datos:**
+Configuración y datos:
 {USER_DATA_DIR}
 
-**Subcarpetas:**
+Subcarpetas:
 • Configuración: {USER_DATA_DIR}
 • Datos históricos: {HISTORICO_DIR}
 • Gráficos generados: {GRAPHS_DIR}
 
-**Nota:** Los datos se guardan automáticamente en tu carpeta de usuario.
+NOTA: Los datos se guardan automáticamente en tu carpeta de usuario.
 No necesitas crear estas carpetas manualmente.
 """
