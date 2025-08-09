@@ -141,9 +141,7 @@ def calcular_promedio_conteo(
     columna_nombre_agente: str,
     codigos_representados: list[str]
 ) -> tuple[float, float]:
-    """
-    Calcula el promedio de operaciones por transportista para representados y no representados.
-    """
+    # Calcula el promedio de operaciones por transportista para representados y no representados.
     df_representados = df[df[columna_agente].astype(str).isin(codigos_representados)]
     df_otros = df[~df[columna_agente].astype(str).isin(codigos_representados)]
 
