@@ -1,6 +1,9 @@
 import customtkinter as ctk  # Librería para una interfaz gráfica moderna basada en tkinter
 from tkinter import filedialog, messagebox  # Utilidades para abrir archivos y mostrar mensajes emergentes
 from src import main  # Se importa el módulo principal que procesa el archivo
+from src.views.viajes_viewer import abrir_viajes_viewer
+from src.models import db as db_model
+from typing import Optional
 from src.config import (
     RUTA_GRAFICO_PROMEDIOS, TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS,
     MENSAJE_ARCHIVO_INVALIDO, MENSAJE_PROCESAMIENTO_EXITOSO, MENSAJE_PROCESAMIENTO_ERROR,
@@ -222,6 +225,10 @@ def crear_dashboard():
     spinner.pack(pady=(0, 5), anchor="w", padx=10)
     theme_widgets['spinner'] = spinner
 
+    # Estado del último archivo cargado para abrir el visualizador
+    df_cargado: Optional[pd.DataFrame] = None
+    periodo_cargado: Optional[str] = None
+
     # Panel de resumen de estadísticas como tarjeta visual
     stats_card = ctk.CTkFrame(master=frame_principal, corner_radius=15, fg_color="#f8fafc", border_width=2, border_color="#b0bec5")
     stats_card.pack(pady=(0, 15), padx=20, fill="x")
@@ -351,6 +358,9 @@ def crear_dashboard():
                 df = validar_y_cargar_archivo(ruta_archivo)
                 feedback_icon.set(MENSAJE_ARCHIVO_VALIDO)
                 label_feedback.configure(text_color=COLOR_EXITO)
+                # Guardar DF cargado en estado
+                nonlocal df_cargado
+                df_cargado = df
             except Exception as e:
                 feedback_icon.set(MENSAJE_ARCHIVO_INVALIDO_ICONO)
                 label_feedback.configure(text_color=COLOR_ERROR)
@@ -366,6 +376,12 @@ def crear_dashboard():
                 mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
                 mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
                 set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
+                # Calcular y guardar periodo del archivo para el visualizador
+                nonlocal periodo_cargado
+                try:
+                    periodo_cargado = db_model.obtener_periodo_desde_df(df_cargado, "Fecha ingreso") if df_cargado is not None else None
+                except Exception:
+                    periodo_cargado = None
                 if es_preview:
                     feedback_icon.set("ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
                     label_feedback.configure(text_color="#e67e22")
@@ -374,6 +390,9 @@ def crear_dashboard():
                     label_feedback.configure(text_color=COLOR_EXITO)
                 spinner.configure(text="")
                 boton.configure(state='normal')
+                # Habilitar botón del visualizador si hay datos válidos
+                if df_cargado is not None and periodo_cargado:
+                    boton_viajes.configure(state='normal')
             except Exception as e:
                 feedback_icon.set(MENSAJE_PROCESAMIENTO_ERROR)
                 label_feedback.configure(text_color=COLOR_ERROR)
@@ -394,6 +413,28 @@ def crear_dashboard():
                           font=("Segoe UI", 13, "bold"))
     boton.pack(pady=5)
     theme_widgets['boton'] = boton
+
+    # Botón para abrir el visualizador de viajes por representado
+    def abrir_visualizador() -> None:
+        if df_cargado is None or not periodo_cargado:
+            messagebox.showinfo("Información", "Primero cargá y procesá un manifiesto válido para poder visualizar.")
+            return
+        try:
+            abrir_viajes_viewer(ventana, df_cargado, CODIGOS_REPRESENTADOS, periodo_cargado)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    boton_viajes = ctk.CTkButton(
+        master=frame_principal,
+        text="Viajes por Representado",
+        command=abrir_visualizador,
+        fg_color="#4a9eff",
+        hover_color="#66b3ff",
+        font=("Segoe UI", 12, "bold"),
+        state='disabled'
+    )
+    boton_viajes.pack(pady=(0, 10))
+    theme_widgets['boton_viajes'] = boton_viajes
 
     # ───────────────────────── Frame inferior (donde van las imágenes de los gráficos)
     # Frame contenedor para centrar el área de gráficos

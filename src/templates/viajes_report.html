@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <title>{{ nombre }} - Detalle de Viajes ({{ periodo }})</title>
+    <link rel="stylesheet" href="report.css" />
+</head>
+
+<body>
+    <header class="header">
+        <div class="info">
+            <h1 class="titulo">{{ nombre }}</h1>
+            <ul class="meta">
+                <li><strong>Código:</strong> {{ codigo }}</li>
+                <li><strong>Período:</strong> {{ periodo }}</li>
+                <li><strong>Total de viajes:</strong> {{ total_viajes }}</li>
+                <li><strong>Monto total:</strong> $ {{ monto_total }}</li>
+            </ul>
+        </div>
+        {% if logo_url %}
+        <div class="logo">
+            <img src="{{ logo_url }}" alt="Logo" />
+        </div>
+        {% endif %}
+    </header>
+
+    <section class="tabla-wrapper">
+        <h2>Tabla de Viajes</h2>
+        <table class="tabla">
+            <thead>
+                <tr>
+                    {% for col in columnas %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in filas %}
+                <tr>
+                    {% for col in columnas %}
+                    <td>{{ fila[col] }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="{{ columnas|length - 1 }}" class="total-label">Total</td>
+                    <td class="total">$ {{ monto_total }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </section>
+
+    {# El paginado visual se manejará desde wkhtmltopdf (encabezado). Este pie ya no es necesario. #}
+</body>
+
+</html>
