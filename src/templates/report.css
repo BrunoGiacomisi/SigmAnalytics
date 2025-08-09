@@ -1,0 +1,70 @@
+@page {
+  size: A4;
+  margin: 18mm 16mm 16mm 16mm;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #222;
+  font-size: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.titulo {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  color: #00587A;
+}
+.meta {
+  margin: 0;
+  padding-left: 16px;
+}
+.meta li { margin: 2px 0; }
+
+.logo img {
+  height: 60px;
+}
+
+.tabla-wrapper {
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.tabla-wrapper h2 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+table.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  page-break-inside: auto;
+}
+table.tabla thead { display: table-header-group; }
+table.tabla tfoot { display: table-footer-group; }
+table.tabla th,
+table.tabla td {
+  border: 1px solid #b0bec5;
+  padding: 6px 8px;
+  text-align: left;
+}
+table.tabla th {
+  background: #f4f6f8;
+  font-weight: 600;
+}
+table.tabla tr { page-break-inside: avoid; }
+
+.total-label { text-align: right; font-weight: 600; }
+.total { font-weight: 700; }
+
+/* Pie de página eliminado; numeración se mueve al encabezado del PDF */
+
+

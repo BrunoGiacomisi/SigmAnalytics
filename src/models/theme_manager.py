@@ -7,7 +7,7 @@ class ThemeManager:
     # Manejador de temas del sistema.
     
     def __init__(self):
-        self.current_theme = config_manager.get_theme()
+        self.current_theme = config_manager.get_theme() # Obtiene el tema actual del config_manager
         self.themes = THEMES
     
     def get_current_theme_colors(self) -> Dict[str, str]:

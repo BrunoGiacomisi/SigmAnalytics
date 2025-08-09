@@ -17,6 +17,11 @@ sqlite3  # Built-in with Python
 # Development and building
 pyinstaller>=6.0.0
 
+# HTML rendering to PDF
+Jinja2>=3.1.0
+pdfkit>=1.0.0
+tkinterweb>=3.23.7
+
 # Optional: For enhanced development
 # pytest>=7.0.0  # For testing
 # black>=23.0.0  # For code formatting
