@@ -16,6 +16,7 @@ Sistema de análisis y visualización de datos de manifiestos para SIGMA CARGO, 
 - Python 3.8 o superior
 - Windows 10/11 (probado en Windows 10)
 - Dependencias listadas en `requirements.txt`
+- wkhtmltopdf 0.12.x (opcional; requerido para exportar a PDF)
 
 ## 🛠️ Instalación
 
@@ -68,12 +69,11 @@ SigmAnalytics/
 │   │   └── theme_manager.py # Gestión de temas
 │   ├── views/
 │   │   └── dashboard.py     # Interfaz gráfica
-│   ├── controllers/         # Lógica de control
+│   ├── controllers/         # Lógica de control (ej.: dashboard_controller.py)
 │   ├── assets/              # Recursos (logos, imágenes)
 │   └── data/                # Datos y base de datos
-├── outputs/                 # Gráficos generados
+├── outputs/                 # Gráficos generados (uso en desarrollo)
 ├── venv/                    # Entorno virtual
-├── config.json              # Configuración del usuario
 ├── .gitignore              # Archivos a ignorar en Git
 └── README.md               # Este archivo
 ```
@@ -89,7 +89,42 @@ SigmAnalytics/
 
 - **Logo**: Coloca `sigma_cargo_logo.png` en `src/assets/`
 - **Temas**: Modifica los colores en `src/config.py`
-- **Base de datos**: Ubicada en `src/data/historico`
+- **Base de datos**: Se guarda en la carpeta de datos del usuario
+
+## 📦 Ubicación de datos (Windows)
+
+La aplicación guarda configuración, gráficos y base de datos en la carpeta de usuario (se crean automáticamente):
+
+- Configuración: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\config.json`
+- Histórico (SQLite): `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\data\\historico\\historico.db`
+- Gráficos: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\outputs\\`
+
+Desde la app podés ver esta información con el botón "Datos" del dashboard.
+
+## 🖨️ Exportar a PDF
+
+La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
+
+1. Instalar wkhtmltopdf en Windows:
+
+- Descargá el instalador desde la página oficial.
+- Durante la instalación, asegurate de incluir el componente "wkhtmltopdf" en PATH.
+
+2. Alternativa: variable de entorno si no está en PATH
+
+- Definí una de estas variables apuntando al ejecutable:
+  - `WKHTMLTOPDF_BINARY` o `WKHTMLTOPDF_PATH`
+  - Ejemplo: `C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe`
+
+3. Verificación dentro de la app
+
+- En el visualizador de viajes, la app te avisará si wkhtmltopdf no está disponible y deshabilitará los botones de exportación.
+
+4. Troubleshooting
+
+- Error "No se encontró wkhtmltopdf": instalá o configurá la variable de entorno como se indica arriba.
+- Error de permisos: probá ejecutar la app con permisos adecuados o instalar wkhtmltopdf en una ruta sin espacios.
+- CSS no aplicado en el PDF: asegurate de que `report.css` esté en `src/templates/`.
 
 ## 📊 Funcionalidades de Análisis
 

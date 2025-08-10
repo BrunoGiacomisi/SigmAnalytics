@@ -64,7 +64,3 @@ table.tabla tr { page-break-inside: avoid; }
 
 .total-label { text-align: right; font-weight: 600; }
 .total { font-weight: 700; }
-
-/* Pie de página eliminado; numeración se mueve al encabezado del PDF */
-
-
