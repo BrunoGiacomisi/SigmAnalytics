@@ -26,6 +26,11 @@ def build_report_html(context: Dict[str, Any]) -> str:
     return render_html("viajes_report.html", context)
 
 
+def is_wkhtmltopdf_available() -> bool:
+    # Retorna True si se encuentra wkhtmltopdf accesible en el sistema.
+    return _has_wkhtmltopdf() is not None
+
+
 def _has_wkhtmltopdf() -> Optional[str]:
     # Devuelve ruta del ejecutable de wkhtmltopdf si existe en PATH o ubicaciones comunes de Windows.
     # 1) PATH
@@ -67,7 +72,11 @@ def export_pdf_from_html(html_content: str, css_path: Optional[Path], output_pdf
     wkhtml = _has_wkhtmltopdf()
     if not wkhtml:
         raise RuntimeError(
-            "No se encontró wkhtmltopdf. Instálalo o configura WKHTMLTOPDF_BINARY apuntando al ejecutable."
+            (
+                "Falta el binario 'wkhtmltopdf'.\n"
+                "1) Descárgalo e instálalo en Windows (versión 0.12.x).\n"
+                "2) O define la variable de entorno WKHTMLTOPDF_BINARY/WKHTMLTOPDF_PATH apuntando al ejecutable."
+            )
         )
     # Encabezado condicional: se muestra 'Página X de Y' solo si hay más de una página.
     # wkhtmltopdf no permite condición directa, pero un truco común es pintar el header
@@ -90,13 +99,17 @@ def export_pdf_from_html(html_content: str, css_path: Optional[Path], output_pdf
         "header-font-size": "9",
     }
     css_arg = [str(css_path)] if css_path else None
-    pdfkit.from_string(
-        html_content,
-        str(output_pdf),
-        css=css_arg,
-        options=options,
-        configuration=pdfkit.configuration(wkhtmltopdf=wkhtml),
-    )
+    try:
+        pdfkit.from_string(
+            html_content,
+            str(output_pdf),
+            css=css_arg,
+            options=options,
+            configuration=pdfkit.configuration(wkhtmltopdf=wkhtml),
+        )
+    except OSError as e:
+        # Errores típicos cuando wkhtmltopdf no está accesible o hay problemas de permisos
+        raise RuntimeError(f"Error al generar PDF con wkhtmltopdf: {e}")
     return output_pdf
 
 

@@ -18,6 +18,13 @@ from PIL import Image, ImageTk  # Para trabajar con imágenes en tkinter
 import os
 import pandas as pd
 import sys
+import threading
+from src.controllers.dashboard_controller import (
+    select_manifest_file,
+    validate_and_load_manifest,
+    process_manifest,
+    compute_period,
+)
 
 def resource_path(relative_path):
     try:
@@ -41,6 +48,11 @@ def crear_dashboard():
 
     ventana = ctk.CTk()  # Se instancia la ventana principal
     ventana.title("SigmAnalytics")  # Título de la ventana
+    # Inicializar base de datos (crear tabla si no existe)
+    try:
+        db_model.crear_tabla_si_no_existe()
+    except Exception as e:
+        print(f"Error inicializando base de datos: {e}")
     
     # Aplicar tamaño y posición guardados
     ventana.geometry(saved_window_size)
@@ -289,12 +301,11 @@ def crear_dashboard():
     theme_widgets['label_historial'] = label_historial
 
     def validar_y_cargar_archivo(ruta_archivo: str) -> pd.DataFrame:
-        # Valida y carga el archivo Excel, lanza ValueError si no es válido.
-        df: pd.DataFrame = pd.read_excel(ruta_archivo).rename(columns=lambda x: x.strip())
-        columnas_esperadas = {"Ag.transportista", "Nombre Ag.Transportista"}
-        if not columnas_esperadas.issubset(set(df.columns)):
+        # Centraliza validación usando el controller
+        try:
+            return validate_and_load_manifest(ruta_archivo)
+        except ValueError:
             raise ValueError(MENSAJE_ARCHIVO_INVALIDO)
-        return df
 
     def actualizar_panel_resultados(
         mediana_rep: float,
@@ -347,58 +358,64 @@ def crear_dashboard():
         try:
             boton.configure(state='disabled')
             spinner.configure(text="⏳ Procesando...")
-            ruta_archivo = filedialog.askopenfilename(title="Seleccionar manifiesto", filetypes=[["Archivos Excel", "*.xlsx *.xls"]])
+            ruta_archivo = select_manifest_file()
             if not ruta_archivo:
                 feedback_icon.set("")
                 spinner.configure(text="")
                 boton.configure(state='normal')
                 return
             archivo_seleccionado.set(f"Archivo: {os.path.basename(ruta_archivo)}")
-            try:
-                df = validar_y_cargar_archivo(ruta_archivo)
-                feedback_icon.set(MENSAJE_ARCHIVO_VALIDO)
-                label_feedback.configure(text_color=COLOR_EXITO)
-                # Guardar DF cargado en estado
-                nonlocal df_cargado
-                df_cargado = df
-            except Exception as e:
-                feedback_icon.set(MENSAJE_ARCHIVO_INVALIDO_ICONO)
-                label_feedback.configure(text_color=COLOR_ERROR)
-                spinner.configure(text="")
-                boton.configure(state='normal')
-                messagebox.showerror("Error al procesar", MENSAJE_ARCHIVO_INVALIDO)
-                return
-            try:
-                resultado = main.procesar_archivo(ruta_archivo, CODIGOS_REPRESENTADOS)
-                mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, actualizado, viajes_representados, ruta_boxplot_periodo, ruta_barplot_periodo, es_preview = resultado
-                actualizar_panel_resultados(mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, viajes_representados, actualizado)
-                mostrar_imagen(ruta_boxplot_periodo, etiqueta_imagen_boxplot)
-                mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
-                mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
-                set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
-                # Calcular y guardar periodo del archivo para el visualizador
-                nonlocal periodo_cargado
+
+            def run_proceso():
                 try:
-                    periodo_cargado = db_model.obtener_periodo_desde_df(df_cargado, "Fecha ingreso") if df_cargado is not None else None
-                except Exception:
-                    periodo_cargado = None
-                if es_preview:
-                    feedback_icon.set("ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
-                    label_feedback.configure(text_color="#e67e22")
-                else:
-                    feedback_icon.set(MENSAJE_PROCESAMIENTO_EXITOSO)
-                    label_feedback.configure(text_color=COLOR_EXITO)
-                spinner.configure(text="")
-                boton.configure(state='normal')
-                # Habilitar botón del visualizador si hay datos válidos
-                if df_cargado is not None and periodo_cargado:
-                    boton_viajes.configure(state='normal')
-            except Exception as e:
-                feedback_icon.set(MENSAJE_PROCESAMIENTO_ERROR)
-                label_feedback.configure(text_color=COLOR_ERROR)
-                spinner.configure(text="")
-                boton.configure(state='normal')
-                messagebox.showerror("Error al procesar", str(e))
+                    # 1) Validación y carga para feedback temprano
+                    try:
+                        df_local = validar_y_cargar_archivo(ruta_archivo)
+                    except Exception:
+                        def on_invalid():
+                            feedback_icon.set(MENSAJE_ARCHIVO_INVALIDO_ICONO)
+                            label_feedback.configure(text_color=COLOR_ERROR)
+                            spinner.configure(text="")
+                            boton.configure(state='normal')
+                            messagebox.showerror("Error al procesar", MENSAJE_ARCHIVO_INVALIDO)
+                        ventana.after(0, on_invalid)
+                        return
+
+                    # 2) Procesamiento pesado
+                    resultado = process_manifest(ruta_archivo, CODIGOS_REPRESENTADOS, df=df_local)
+                    mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, actualizado, viajes_representados, ruta_boxplot_periodo, ruta_barplot_periodo, es_preview = resultado
+
+                    # 3) Calcular periodo para el viewer
+                    periodo_local = compute_period(df_local, "Fecha ingreso")
+
+                    def on_success():
+                        nonlocal df_cargado, periodo_cargado
+                        df_cargado = df_local
+                        periodo_cargado = periodo_local
+                        feedback_icon.set(MENSAJE_PROCESAMIENTO_EXITOSO if not es_preview else "ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
+                        label_feedback.configure(text_color=(COLOR_EXITO if not es_preview else "#e67e22"))
+                        actualizar_panel_resultados(mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, viajes_representados, actualizado)
+                        mostrar_imagen(ruta_boxplot_periodo, etiqueta_imagen_boxplot)
+                        mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
+                        mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
+                        set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
+                        spinner.configure(text="")
+                        boton.configure(state='normal')
+                        if df_cargado is not None and periodo_cargado:
+                            boton_viajes.configure(state='normal')
+                    ventana.after(0, on_success)
+
+                except Exception as e:
+                    def on_error():
+                        feedback_icon.set(MENSAJE_PROCESAMIENTO_ERROR)
+                        label_feedback.configure(text_color=COLOR_ERROR)
+                        spinner.configure(text="")
+                        boton.configure(state='normal')
+                        messagebox.showerror("Error al procesar", str(e))
+                    ventana.after(0, on_error)
+
+            threading.Thread(target=run_proceso, daemon=True).start()
+
         except Exception as e:
             spinner.configure(text="")
             boton.configure(state='normal')

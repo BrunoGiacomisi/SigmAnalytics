@@ -3,16 +3,16 @@ import pandas as pd  # Librería para manipulación de datos, usamos esto para l
 from typing import Optional
 import sys
 import os
+from src.config import HISTORICO_DIR
 
 def persistent_path(relative_path):
-    # Siempre usa la ruta absoluta a src/data/historico, sin importar el modo de ejecución
+    # Deprecated: mantenido por compatibilidad si algún código externo lo usa.
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
     return os.path.abspath(os.path.join(base_path, os.path.basename(relative_path)))
 
-# Ruta donde se guardará (o ya existe) la base de datos SQLite
-DB_PATH = persistent_path('historico')
-print("USANDO BASE DE DATOS EN:", DB_PATH)
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+# Ruta donde se guardará (o ya existe) la base de datos SQLite (en AppData del usuario)
+DB_PATH = os.path.join(str(HISTORICO_DIR), 'historico.db')
+os.makedirs(str(HISTORICO_DIR), exist_ok=True)
 
 # -------------------------------------------------------------------------
 # Crea la tabla 'historico' si todavía no existe en la base de datos

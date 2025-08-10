@@ -13,7 +13,7 @@ from src.models.viajes_representado import (
     listar_representados_con_viajes,
 )
 from src.config import LOGO_PATH
-from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR
+from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR, is_wkhtmltopdf_available
 
 try:  # WebView para previsualizar HTML (sin depender del navegador)
     from tkinterweb import HtmlFrame  # type: ignore
@@ -61,6 +61,21 @@ class ViajesViewer(ctk.CTkToplevel):
 
         self.btn_export_all = ctk.CTkButton(acciones, text="Exportar todos a PDF", command=self._on_export_all)
         self.btn_export_all.pack(side="left", padx=10)
+
+        # Aviso proactivo si falta wkhtmltopdf
+        self._wkhtml_disponible = is_wkhtmltopdf_available()
+        if not self._wkhtml_disponible:
+            self.btn_export.configure(state="disabled")
+            self.btn_export_all.configure(state="disabled")
+            aviso = ctk.CTkLabel(
+                acciones,
+                text=(
+                    "⚠ wkhtmltopdf no está disponible. Instalalo o setea WKHTMLTOPDF_BINARY/WKHTMLTOPDF_PATH "
+                    "para habilitar la exportación a PDF."
+                ),
+                text_color="#e67e22",
+            )
+            aviso.pack(side="left", padx=10)
 
         # Tabla (usaremos un Text simple renderizado por ahora para no introducir dependencias adicionales)
         body = ctk.CTkFrame(self)
@@ -160,7 +175,10 @@ class ViajesViewer(ctk.CTkToplevel):
             )
             messagebox.showinfo("Exportación", f"PDF generado en: {ruta_pdf}")
         except Exception as e:
-            messagebox.showerror("Error", str(e))
+            message = str(e)
+            if "wkhtmltopdf" in message.lower():
+                message += "\n\nSugerencia: instalá wkhtmltopdf (0.12.x) o configurá WKHTMLTOPDF_BINARY/WKHTMLTOPDF_PATH."
+            messagebox.showerror("Error", message)
 
     def _on_export_all(self) -> None:
         try:
