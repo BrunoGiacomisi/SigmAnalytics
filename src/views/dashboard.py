@@ -61,9 +61,8 @@ def crear_dashboard():
     
     ventana.minsize(800, 600)         # Tamaño mínimo para evitar que se rompa el layout
 
-    # Configura la ventana para que los frames se expandan
-    ventana.grid_rowconfigure(0, weight=0)  # Frame superior (título, botón, stats)
-    ventana.grid_rowconfigure(1, weight=1)  # Frame de gráficos ocupa el espacio extra
+    # Configura la ventana para que el contenedor scroll ocupe todo
+    ventana.grid_rowconfigure(0, weight=1)
     ventana.grid_columnconfigure(0, weight=1)
 
     # Diccionario para almacenar widgets que necesitan actualización de tema
@@ -167,9 +166,13 @@ def crear_dashboard():
     # Configurar evento de cierre de ventana
     ventana.protocol("WM_DELETE_WINDOW", lambda: [guardar_configuracion_ventana(), ventana.destroy()])
 
+    # Contenedor desplazable vertical para todo el contenido del dashboard
+    scroll_container = ctk.CTkScrollableFrame(master=ventana, fg_color="#f4f4f4", corner_radius=0)
+    scroll_container.grid(row=0, column=0, sticky="nsew")
+
     # ───────────────────────── Frame superior (título + botón + resultados)
-    frame_principal = ctk.CTkFrame(master=ventana, corner_radius=20, fg_color="#dedbd7")
-    frame_principal.grid(row=0, column=0, sticky="ew", padx=30, pady=20)
+    frame_principal = ctk.CTkFrame(master=scroll_container, corner_radius=20, fg_color="#dedbd7")
+    frame_principal.pack(fill="x", padx=30, pady=20)
     theme_widgets['frame_principal'] = frame_principal
 
     # Frame para el header (logo + título + botones)
@@ -455,8 +458,8 @@ def crear_dashboard():
 
     # ───────────────────────── Frame inferior (donde van las imágenes de los gráficos)
     # Frame contenedor para centrar el área de gráficos
-    frame_graficos_outer = ctk.CTkFrame(master=ventana, fg_color="#f4f4f4")
-    frame_graficos_outer.grid(row=1, column=0, sticky="nsew")
+    frame_graficos_outer = ctk.CTkFrame(master=scroll_container, fg_color="#f4f4f4")
+    frame_graficos_outer.pack(fill="both", expand=True)
     frame_graficos_outer.grid_columnconfigure(0, weight=1)
     theme_widgets['frame_graficos_outer'] = frame_graficos_outer
 

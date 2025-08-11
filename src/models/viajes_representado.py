@@ -119,7 +119,7 @@ def formatear_datos_para_visualizacion(df_viajes: pd.DataFrame) -> pd.DataFrame:
     if "Fecha ingreso" in df_out.columns:
         df_out["Fecha ingreso"] = pd.to_datetime(df_out["Fecha ingreso"], errors="coerce").dt.strftime("%d-%m-%Y")
     if "Precio" in df_out.columns:
-        df_out["Precio"] = df_out["Precio"].map(lambda x: f"$ {x:,.2f}")
+        df_out["Precio"] = df_out["Precio"].map(lambda x: f"$ {x:,.0f}")
     return df_out
 
 
@@ -160,12 +160,19 @@ def exportar_pdf_viajes(
     columnas = list(df_viajes_formateado.columns)
     filas = df_viajes_formateado.to_dict(orient="records")
 
+    # Formateo sin decimales para PDF
+    def _fmt_money(value: float) -> str:
+        try:
+            return f"{float(value):,.0f}"
+        except Exception:
+            return str(value)
+
     context = {
         "nombre": metadata.get("nombre", "-"),
         "codigo": metadata.get("codigo", "-"),
         "periodo": metadata.get("periodo", "-"),
         "total_viajes": metadata.get("total_viajes", "0"),
-        "monto_total": f"{float(metadata.get('monto_total', 0)):.2f}",
+        "monto_total": _fmt_money(metadata.get('monto_total', 0)),
         "columnas": columnas,
         "filas": filas,
         "logo_url": str(LOGO_PATH) if (logo_path or LOGO_PATH) else None,

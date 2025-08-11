@@ -78,20 +78,16 @@ def export_pdf_from_html(html_content: str, css_path: Optional[Path], output_pdf
                 "2) O define la variable de entorno WKHTMLTOPDF_BINARY/WKHTMLTOPDF_PATH apuntando al ejecutable."
             )
         )
-    # Encabezado condicional: se muestra 'Página X de Y' solo si hay más de una página.
-    # wkhtmltopdf no permite condición directa, pero un truco común es pintar el header
-    # y usar CSS para ocultarlo cuando es '1 de 1'. Sin soporte de variables en CSS
-    # de wkhtmltopdf, optamos por SIEMPRE mostrar el header en PDF y ocultarlo en la
-    # previsualización HTML. Como compromiso práctico, lo dejamos visible en PDF.
-    # Usar header-right con tokens nativos de wkhtmltopdf (más fiable en Windows)
+
+
     options = {
         "encoding": "UTF-8",
         "quiet": "",
         # márgenes similares a CSS @page
-        "margin-top": "18mm",
-        "margin-right": "16mm",
-        "margin-bottom": "16mm",
-        "margin-left": "16mm",
+        "margin-top": "16mm",
+        "margin-right": "14mm",
+        "margin-bottom": "14mm",
+        "margin-left": "14mm",
         "enable-local-file-access": None,
         # Header con numeración de páginas (siempre visible en PDF)
         "header-spacing": "4",

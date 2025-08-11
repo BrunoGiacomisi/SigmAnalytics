@@ -1,12 +1,12 @@
 @page {
   size: A4;
-  margin: 18mm 16mm 16mm 16mm;
+  margin: 16mm 14mm 14mm 14mm; /* reducido ~1mm (~3pt) */
 }
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   color: #222;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .header {
@@ -20,15 +20,19 @@ body {
 }
 .titulo {
   margin: 0 0 6px 0;
-  font-size: 20px;
+  font-size: 22px; /* +2 puntos aprox */
   color: #00587A;
 }
 .meta {
   margin: 0;
-  padding-left: 16px;
+  padding-left: 0; /* quitar viñetas/indentación */
+  list-style: none; /* sin puntos */
 }
 .meta li { margin: 2px 0; }
 
+.logo {
+  margin-left: 20px; /* espacio respecto de los parámetros */
+}
 .logo img {
   height: 60px;
 }
@@ -40,8 +44,9 @@ body {
 }
 .tabla-wrapper h2 {
   margin: 0 0 8px 0;
-  font-size: 14px;
+  font-size: 16px; /* un poco más grande */
 }
+.tabla-wrapper h2 .ingresos { font-weight: 700; color: #00587A; }
 
 table.tabla {
   width: 100%;
@@ -55,6 +60,7 @@ table.tabla td {
   border: 1px solid #b0bec5;
   padding: 6px 8px;
   text-align: left;
+  vertical-align: middle; /* evita desalineo vertical */
 }
 table.tabla th {
   background: #f4f6f8;
@@ -63,4 +69,8 @@ table.tabla th {
 table.tabla tr { page-break-inside: avoid; }
 
 .total-label { text-align: right; font-weight: 600; }
-.total { font-weight: 700; }
+.total {
+  font-weight: 700;
+  text-align: right;       /* alinear a la derecha el importe */
+  white-space: nowrap;     /* evita salto entre '$' y el número */
+}
