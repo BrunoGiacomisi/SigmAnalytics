@@ -12,7 +12,6 @@
         <div class="info">
             <h1 class="titulo">{{ nombre }}</h1>
             <ul class="meta">
-                <li><strong>Código:</strong> {{ codigo }}</li>
                 <li><strong>Período:</strong> {{ periodo }}</li>
                 <li><strong>Total de viajes:</strong> {{ total_viajes }}</li>
                 <li><strong>Monto total:</strong> $ {{ monto_total }}</li>
@@ -26,7 +25,7 @@
     </header>
 
     <section class="tabla-wrapper">
-        <h2>Tabla de Viajes</h2>
+        <h2>Tabla de viajes de <span class="ingresos">ingresos</span></h2>
         <table class="tabla">
             <thead>
                 <tr>
@@ -47,7 +46,7 @@
             <tfoot>
                 <tr>
                     <td colspan="{{ columnas|length - 1 }}" class="total-label">Total</td>
-                    <td class="total">$ {{ monto_total }}</td>
+                    <td class="total">$&nbsp;{{ monto_total }}</td>
                 </tr>
             </tfoot>
         </table>

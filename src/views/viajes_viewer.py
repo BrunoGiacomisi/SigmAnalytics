@@ -110,13 +110,20 @@ class ViajesViewer(ctk.CTkToplevel):
         else:
             columnas = list(df.columns)
             filas = df.to_dict(orient="records")
+            # Formateo de montos sin decimales para la previsualización
+            def _fmt_money(value: float) -> str:
+                try:
+                    return f"{float(value):,.0f}"
+                except Exception:
+                    return str(value)
+
             context = {
                 "nombre": self.display_var.get() or "-",
                 "codigo": self.codigo_por_nombre.get(self.display_var.get(), "-"),
                 "periodo": self.periodo,
                 "total_viajes": str(len(df)),
                 # En preview no recalcamos el total monetario exacto, lo formatea el PDF; aquí sumamos precios
-                "monto_total": f"{sum([float(str(x).replace('$','').replace(',','').replace(' ','')) if 'Precio' in columnas else 0 for x in df.get('Precio', [])]):.2f}",
+                "monto_total": _fmt_money(sum([float(str(x).replace('$','').replace(',','').replace(' ','')) if 'Precio' in columnas else 0 for x in df.get('Precio', [])])),
                 "columnas": columnas,
                 "filas": filas,
                 "logo_url": str(LOGO_PATH),
@@ -173,7 +180,7 @@ class ViajesViewer(ctk.CTkToplevel):
                 columnas=DEFAULT_COLUMNS_ORDER,
                 logo_path=str(LOGO_PATH),
             )
-            messagebox.showinfo("Exportación", f"PDF generado en: {ruta_pdf}")
+            messagebox.showinfo("Exportación", "PDF generado en la carpeta descargas")
         except Exception as e:
             message = str(e)
             if "wkhtmltopdf" in message.lower():
