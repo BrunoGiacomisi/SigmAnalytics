@@ -4,7 +4,6 @@ from tkinter import filedialog
 from typing import Optional
 from src.models.data_loader import cargar_manifesto
 from src.services.analytics_service import AnalyticsService
-from src.constants import Columns
 
 
 class FileService:
