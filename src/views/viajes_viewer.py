@@ -48,7 +48,7 @@ class ViajesViewer(ctk.CTkToplevel):
         self.stats_vars = {
             'total_viajes': ctk.StringVar(value="0"),
             'monto_total': ctk.StringVar(value="$ 0"),
-            'precio_promedio': ctk.StringVar(value="$ 0"),
+            'codigo_actual': ctk.StringVar(value="-"),
             'representado_actual': ctk.StringVar(value="")
         }
 
@@ -115,7 +115,7 @@ class ViajesViewer(ctk.CTkToplevel):
         # Crear KPIs individuales
         self._crear_kpi_card(kpi_frame, "🚚 Total Viajes", self.stats_vars['total_viajes'], 0, 0)
         self._crear_kpi_card(kpi_frame, "💰 Monto Total", self.stats_vars['monto_total'], 0, 1)
-        self._crear_kpi_card(kpi_frame, "📊 Precio Promedio", self.stats_vars['precio_promedio'], 0, 2)
+        self._crear_kpi_card(kpi_frame, "🏷️ Código", self.stats_vars['codigo_actual'], 0, 2)
         self._crear_kpi_card(kpi_frame, "👤 Representado", self.stats_vars['representado_actual'], 0, 3)
 
         # ═══════════════════════════════════════════════════════════════════════════════
@@ -264,7 +264,7 @@ class ViajesViewer(ctk.CTkToplevel):
         if df.empty:
             self.stats_vars['total_viajes'].set("0")
             self.stats_vars['monto_total'].set("$ 0")
-            self.stats_vars['precio_promedio'].set("$ 0")
+            self.stats_vars['codigo_actual'].set("-")
             self.stats_vars['representado_actual'].set("Sin selección")
         else:
             # Calcular estadísticas
@@ -272,44 +272,95 @@ class ViajesViewer(ctk.CTkToplevel):
             stats = calcular_estadisticas_viajes(df)
             # Keys válidas según calcular_estadisticas_viajes
             monto_total = stats.get("total", 0)
-            precio_promedio = stats.get("precio_por_viaje", 0)
             
             # Formatear valores con separador de miles
             def format_currency(value):
                 return f"$ {value:,.0f}".replace(",", ".")
             
+            # Obtener código del representado actual
+            representado_actual = self.display_var.get() or "Sin selección"
+            codigo_actual = self.codigo_por_nombre.get(representado_actual, "-")
+            
             # Actualizar variables
             self.stats_vars['total_viajes'].set(f"{total_viajes:,} viajes".replace(",", "."))
             self.stats_vars['monto_total'].set(format_currency(monto_total))
-            self.stats_vars['precio_promedio'].set(format_currency(precio_promedio))
-            self.stats_vars['representado_actual'].set(self.display_var.get() or "Sin selección")
+            self.stats_vars['codigo_actual'].set(codigo_actual)
+            self.stats_vars['representado_actual'].set(representado_actual)
 
     def _render_preview(self, df: pd.DataFrame) -> None:
-        # Renderiza HTML de la plantilla para previsualizar con el mismo diseño del PDF
+        # Renderiza HTML optimizado para preview con mejor formato
         if df.empty:
             html = "<div style='padding:16px;font-family:Segoe UI,Arial;color:#666'>No hay viajes para el período seleccionado.</div>"
         else:
-            columnas = list(df.columns)
-            filas = df.to_dict(orient="records")
-            # Formateo de montos sin decimales para la previsualización
-            def _fmt_money(value: float) -> str:
-                try:
-                    return f"{float(value):,.0f}"
-                except Exception:
-                    return str(value)
-
-            context = {
-                "nombre": self.display_var.get() or "-",
-                "codigo": self.codigo_por_nombre.get(self.display_var.get(), "-"),
-                "periodo": self.periodo,
-                "total_viajes": str(len(df)),
-                # En preview no recalcamos el total monetario exacto, lo formatea el PDF; aquí sumamos precios
-                "monto_total": _fmt_money(sum([float(str(x).replace('$','').replace(',','').replace(' ','')) if 'Precio' in columnas else 0 for x in df.get('Precio', [])])),
-                "columnas": columnas,
-                "filas": filas,
-                "logo_url": str(LOGO_PATH),
-            }
-            html = build_report_html(context)
+            # Calcular estadísticas
+            total_viajes = len(df)
+            stats = calcular_estadisticas_viajes(df)
+            monto_total = stats.get("total", 0)
+            representado_actual = self.display_var.get() or "-"
+            codigo_actual = self.codigo_por_nombre.get(representado_actual, "-")
+            
+            # Crear HTML optimizado para preview
+            html = f"""
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 16px; background: #fff;">
+                <!-- Header con título -->
+                <div style="border-bottom: 2px solid #00587A; margin-bottom: 16px; padding-bottom: 8px;">
+                    <h2 style="margin: 0; color: #00587A; font-size: 18px;">{representado_actual}</h2>
+                </div>
+                
+                <!-- Resumen ejecutivo en formato limpio -->
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <tr>
+                            <td style="padding: 4px 8px; font-weight: 600; color: #666; width: 25%;">Total</td>
+                            <td style="padding: 4px 8px; color: #333;"><strong>{total_viajes}</strong> viajes</td>
+                            <td style="padding: 4px 8px; font-weight: 600; color: #666; width: 25%;">Código</td>
+                            <td style="padding: 4px 8px; color: #333;"><strong>{codigo_actual}</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 8px; font-weight: 600; color: #666;">Monto total</td>
+                            <td style="padding: 4px 8px; color: #00587A; font-weight: 700;">$ {monto_total:,.0f}</td>
+                            <td style="padding: 4px 8px; font-weight: 600; color: #666;">Período</td>
+                            <td style="padding: 4px 8px; color: #333;"><strong>{self.periodo}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Tabla de viajes -->
+                <div style="margin-top: 20px;">
+                    <h3 style="margin: 0 0 12px 0; color: #00587A; font-size: 16px;">Detalle de viajes</h3>
+                    <div style="overflow-x: auto; max-height: 400px; border: 1px solid #ddd; border-radius: 6px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">"""
+            
+            # Crear headers dinámicamente basados en las columnas del DataFrame
+            headers_html = "<tr>"
+            for col in df.columns:
+                headers_html += (
+                    "<th style=\"padding:8px; text-align:left; font-weight:600; "
+                    "border-right:1px solid rgba(0,0,0,0.05); "
+                    "background:#3498db; color:#fff; "
+                    "position:sticky; top:0; z-index:1;\">"
+                    f"{col}</th>"
+                )
+            headers_html += "</tr>"
+            
+            html += headers_html + "<tbody>"
+            
+            # Crear filas de datos
+            for i, (_, row) in enumerate(df.iterrows()):
+                bg_color = "#f8f9fa" if i % 2 == 0 else "white"
+                html += f"<tr style='background: {bg_color}; border-bottom: 1px solid #eee;'>"
+                for col in df.columns:
+                    value = row[col] if pd.notna(row[col]) else "-"
+                    html += f"<td style='padding: 6px 8px; border-right: 1px solid #eee;'>{value}</td>"
+                html += "</tr>"
+            
+            html += """
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            """
 
         if self.preview_html is not None:
             try:

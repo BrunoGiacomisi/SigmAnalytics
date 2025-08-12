@@ -20,23 +20,23 @@
         {% endif %}
     </header>
 
-    <!-- Barra de KPIs como resumen de totales -->
+    <!-- Resumen compacto de totales -->
     <section class="kpi-section">
         <div class="kpi-container">
             <div class="kpi-card">
-                <div class="kpi-title">🚚 Total Viajes</div>
+                <div class="kpi-title">Total Viajes</div>
                 <div class="kpi-value">{{ total_viajes }}</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">💰 Monto Total</div>
+                <div class="kpi-title">Monto Total</div>
                 <div class="kpi-value">$ {{ monto_total }}</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">📊 Precio Promedio</div>
-                <div class="kpi-value">$ {{ precio_por_viaje | default("40") }}</div>
+                <div class="kpi-title">Código</div>
+                <div class="kpi-value">{{ codigo }}</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">📅 Período</div>
+                <div class="kpi-title">Período</div>
                 <div class="kpi-value">{{ periodo }}</div>
             </div>
         </div>
