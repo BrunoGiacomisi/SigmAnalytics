@@ -4,18 +4,14 @@
 <head>
     <meta charset="utf-8" />
     <title>{{ nombre }} - Detalle de Viajes ({{ periodo }})</title>
-    <link rel="stylesheet" href="report.css" />
+    <link rel="stylesheet" href="{{ css_file | default('report.css') }}" />
 </head>
 
 <body>
     <header class="header">
         <div class="info">
             <h1 class="titulo">{{ nombre }}</h1>
-            <ul class="meta">
-                <li><strong>Período:</strong> {{ periodo }}</li>
-                <li><strong>Total de viajes:</strong> {{ total_viajes }}</li>
-                <li><strong>Monto total:</strong> $ {{ monto_total }}</li>
-            </ul>
+            <div class="periodo">Período: {{ periodo }}</div>
         </div>
         {% if logo_url %}
         <div class="logo">
@@ -23,6 +19,28 @@
         </div>
         {% endif %}
     </header>
+
+    <!-- Barra de KPIs como resumen de totales -->
+    <section class="kpi-section">
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div class="kpi-title">🚚 Total Viajes</div>
+                <div class="kpi-value">{{ total_viajes }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">💰 Monto Total</div>
+                <div class="kpi-value">$ {{ monto_total }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">📊 Precio Promedio</div>
+                <div class="kpi-value">$ {{ precio_por_viaje | default("40") }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">📅 Período</div>
+                <div class="kpi-value">{{ periodo }}</div>
+            </div>
+        </div>
+    </section>
 
     <section class="tabla-wrapper">
         <h2>Tabla de viajes de <span class="ingresos">ingresos</span></h2>

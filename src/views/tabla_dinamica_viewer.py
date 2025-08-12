@@ -12,6 +12,8 @@ from src.models.viajes_representado import (
     ordenar_tabla_dinamica,
 )
 from src.config import LOGO_PATH
+from src.models.design_manager import design_manager
+from src.models.design_system import get_color, get_spacing, get_font_tuple
 
 
 class TablaDinamicaViewer(ctk.CTkToplevel):
@@ -27,6 +29,9 @@ class TablaDinamicaViewer(ctk.CTkToplevel):
         self.codigos_representados = codigos_representados
         self.periodo = periodo
         self.orden_actual = "alfabetico"
+        
+        # Obtener colores del sistema de diseño
+        self.colors = design_manager.get_colors()
 
         # Generar datos de la tabla dinámica
         self.df_resumen = generar_tabla_dinamica_resumen(df_original, periodo, codigos_representados)

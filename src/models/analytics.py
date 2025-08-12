@@ -89,48 +89,105 @@ def generar_grafico_temporal(ruta_salida):
     plt.close()
 
 # -----------------------------------------------
-# Boxplot de representados vs. otros
+# Boxplot mejorado de representados vs. otros
 def generar_boxplot_conteos(df, columna_agente, columna_nombre_agente, codigos_representados, ruta_salida):
+    df = df.copy()  # Evitar modificar el DataFrame original
     df["grupo"] = df[columna_agente].astype(str).apply(
-        lambda x: "Representado" if x in codigos_representados else "Otros"
+        lambda x: "Representados" if x in codigos_representados else "Mercado"
     )
     conteos = df.groupby([columna_nombre_agente, "grupo"]).size().reset_index(name="conteo")
 
-    plt.figure(figsize=(8, 6))
-    ax = sns.boxplot(x="grupo", y="conteo", data=conteos, showfliers=False)
-    ax.set_ylim(0, 100)
-    ax.set_yticks(range(0, 101, 10))
-    plt.title("Distribución de operaciones")
-    plt.xlabel("Condición")
-    plt.ylabel("Cantidad de viajes")
-    plt.grid(True)
+    # Configurar figura con mejor tamaño
+    plt.figure(figsize=(10, 6))
+    plt.style.use('default')
+    
+    # Crear boxplot con colores personalizados
+    ax = sns.boxplot(x="grupo", y="conteo", data=conteos, showfliers=False,
+                     palette={"Representados": "#3498db", "Mercado": "#95a5a6"})
+    
+    # Personalizar límites y ticks del eje Y
+    max_conteo = conteos["conteo"].max()
+    ax.set_ylim(0, min(100, max_conteo * 1.1))
+    
+    # Personalizar título y etiquetas
+    ax.set_title("Distribución de Operaciones por Transportista", 
+                fontsize=14, fontweight='bold', pad=20)
+    ax.set_xlabel("Grupo", fontsize=12, fontweight='bold')
+    ax.set_ylabel("Cantidad de Viajes", fontsize=12, fontweight='bold')
+    
+    # Mejorar diseño
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color('#cccccc')
+    ax.spines['bottom'].set_color('#cccccc')
+    ax.grid(axis='y', alpha=0.3, linestyle='--')
+    
+    # Agregar estadísticas en el gráfico
+    for i, grupo in enumerate(["Representados", "Mercado"]):
+        data_grupo = conteos[conteos["grupo"] == grupo]["conteo"]
+        if not data_grupo.empty:
+            mediana = data_grupo.median()
+            promedio = data_grupo.mean()
+            
+            # Agregar texto con estadísticas
+            ax.text(i, ax.get_ylim()[1] * 0.9, 
+                   f'Mediana: {mediana:.1f}\nPromedio: {promedio:.1f}',
+                   ha='center', va='top', fontsize=9, 
+                   bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+    
     plt.tight_layout()
-    plt.savefig(ruta_salida)
+    plt.savefig(ruta_salida, dpi=150, bbox_inches='tight')
     plt.close()
 
 # -----------------------------------------------
-# Gráfico de barras horizontales: top 20 representados + medianas
+# Gráfico de barras horizontales mejorado: top 15 representados + medianas
 def generar_barplot_representados(df, columna_agente, columna_nombre_agente, codigos_representados, mediana_rep, mediana_otros, ruta_salida):
     df_rep = df[df[columna_agente].astype(str).isin(codigos_representados)]
     conteos = df_rep.groupby(columna_nombre_agente).size().sort_values(ascending=False)
 
-    data = conteos[:20].reset_index()
+    # Tomar top 15 para mejor legibilidad
+    data = conteos[:15].reset_index()
     data.columns = ["nombre", "cantidad"]
 
+    # Agregar medianas como referencia
     data = pd.concat([data, pd.DataFrame({
-        "nombre": ["Mediana Mercado", "Mediana Representados"],
+        "nombre": ["── Mediana Mercado ──", "── Mediana Representados ──"],
         "cantidad": [mediana_otros, mediana_rep]
     })], ignore_index=True)
 
-    colores = ["gray"] * (len(data) - 2) + ["red", "blue"]
+    # Colores mejorados: azul para representados, rojo/verde para medianas
+    colores = ["#3498db"] * len(conteos[:15]) + ["#e74c3c", "#27ae60"]
 
-    plt.figure(figsize=(12, 6))
-    plt.barh(data["nombre"], data["cantidad"], color=colores)
-    plt.xlabel("Cantidad de Viajes")
-    plt.ylabel("Transportista")
-    plt.title("Representados + Medianas vs. Mercado")
+    # Configurar figura con mejor tamaño
+    plt.figure(figsize=(12, 8))
+    plt.style.use('default')
+    
+    # Crear barras horizontales
+    bars = plt.barh(data["nombre"], data["cantidad"], color=colores, alpha=0.8, edgecolor='white', linewidth=0.5)
+    
+    # Agregar etiquetas de valor al final de cada barra
+    for i, (bar, value) in enumerate(zip(bars, data["cantidad"])):
+        plt.text(bar.get_width() + max(data["cantidad"]) * 0.01, bar.get_y() + bar.get_height()/2, 
+                f'{int(value)}', ha='left', va='center', fontweight='bold', fontsize=9)
+    
+    # Personalizar ejes y título
+    plt.xlabel("Cantidad de Viajes", fontsize=12, fontweight='bold')
+    plt.ylabel("Transportista", fontsize=12, fontweight='bold')
+    plt.title("Top Transportistas Representados vs. Medianas del Mercado", 
+              fontsize=14, fontweight='bold', pad=20)
+    
+    # Mejorar diseño
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['left'].set_color('#cccccc')
+    plt.gca().spines['bottom'].set_color('#cccccc')
+    plt.grid(axis='x', alpha=0.3, linestyle='--')
+    
+    # Invertir orden para que el mayor esté arriba
+    plt.gca().invert_yaxis()
+    
     plt.tight_layout()
-    plt.savefig(ruta_salida)
+    plt.savefig(ruta_salida, dpi=150, bbox_inches='tight')
     plt.close()
 
 # -----------------------------------------------
@@ -151,23 +208,61 @@ def calcular_promedio_conteo(
     return promedio_rep, promedio_otros
 
 # -----------------------------------------------
-# Gráfico de evolución mensual de los promedios
+# Gráfico mejorado de evolución mensual de los promedios
 def generar_grafico_promedios_temporal(ruta_salida):
     historico = db.obtener_historico_completo()
     if historico.empty:
+        # Crear gráfico vacío con mensaje
+        plt.figure(figsize=(10, 6))
+        plt.text(0.5, 0.5, 'No hay datos históricos disponibles', 
+                ha='center', va='center', fontsize=14, transform=plt.gca().transAxes)
+        plt.title("Evolución Mensual de Promedios", fontsize=14, fontweight='bold')
+        plt.tight_layout()
+        plt.savefig(ruta_salida, dpi=150, bbox_inches='tight')
+        plt.close()
         return
 
     historico["periodo"] = pd.to_datetime(historico["periodo"], format="%Y-%m", errors='coerce')
     historico = historico.dropna(subset=["periodo"]).sort_values("periodo")
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(historico["periodo"], historico["promedio_representados"], label="Representados", marker='o')
-    plt.plot(historico["periodo"], historico["promedio_otros"], label="otros", marker='o')
-    plt.xlabel("Mes")
-    plt.ylabel("Promedio de Operaciones")
-    plt.title("Evolución de Promedios")
-    plt.legend()
-    plt.grid(True)
+    # Configurar figura con mejor tamaño
+    plt.figure(figsize=(12, 6))
+    plt.style.use('default')
+    
+    # Crear líneas con mejor estilo
+    plt.plot(historico["periodo"], historico["promedio_representados"], 
+             label="Representados", marker='o', linewidth=2.5, 
+             color="#3498db", markersize=6, markerfacecolor='white', 
+             markeredgewidth=2, markeredgecolor="#3498db")
+    
+    plt.plot(historico["periodo"], historico["promedio_otros"], 
+             label="Mercado", marker='s', linewidth=2.5, 
+             color="#95a5a6", markersize=6, markerfacecolor='white', 
+             markeredgewidth=2, markeredgecolor="#95a5a6")
+    
+    # Personalizar título y etiquetas
+    plt.title("Evolución Mensual de Promedios de Operaciones", 
+              fontsize=14, fontweight='bold', pad=20)
+    plt.xlabel("Período", fontsize=12, fontweight='bold')
+    plt.ylabel("Promedio de Operaciones", fontsize=12, fontweight='bold')
+    
+    # Mejorar leyenda
+    plt.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
+    
+    # Mejorar diseño
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color('#cccccc')
+    ax.spines['bottom'].set_color('#cccccc')
+    ax.grid(alpha=0.3, linestyle='--')
+    
+    # Formatear fechas en el eje X
+    import matplotlib.dates as mdates
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    plt.xticks(rotation=45)
+    
     plt.tight_layout()
-    plt.savefig(ruta_salida)
+    plt.savefig(ruta_salida, dpi=150, bbox_inches='tight')
     plt.close()

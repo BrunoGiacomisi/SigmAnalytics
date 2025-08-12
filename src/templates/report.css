@@ -23,12 +23,11 @@ body {
   font-size: 22px; /* +2 puntos aprox */
   color: #00587A;
 }
-.meta {
-  margin: 0;
-  padding-left: 0; /* quitar viñetas/indentación */
-  list-style: none; /* sin puntos */
+.periodo {
+  margin: 2px 0;
+  font-size: 14px;
+  color: #666;
 }
-.meta li { margin: 2px 0; }
 
 .logo {
   margin-left: 20px; /* espacio respecto de los parámetros */
@@ -58,19 +57,91 @@ table.tabla tfoot { display: table-footer-group; }
 table.tabla th,
 table.tabla td {
   border: 1px solid #b0bec5;
-  padding: 6px 8px;
+  padding: 8px 12px;
   text-align: left;
   vertical-align: middle; /* evita desalineo vertical */
 }
+
+/* Cabecera sticky y mejorada */
 table.tabla th {
-  background: #f4f6f8;
+  background: #3498db;
+  color: white;
   font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-table.tabla tr { page-break-inside: avoid; }
+
+/* Zebra striping - filas alternadas */
+table.tabla tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+table.tabla tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+/* Alineación de valores numéricos a la derecha */
+table.tabla td:nth-last-child(-n+3) {
+  text-align: right;
+}
+
+/* Hover effect para mejor UX */
+table.tabla tbody tr:hover {
+  background-color: #e3f2fd !important;
+}
+
+table.tabla tr { 
+  page-break-inside: avoid;
+  transition: background-color 0.2s ease;
+}
 
 .total-label { text-align: right; font-weight: 600; }
 .total {
   font-weight: 700;
   text-align: right;       /* alinear a la derecha el importe */
   white-space: nowrap;     /* evita salto entre '$' y el número */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+/* BARRA DE KPIs */
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-section {
+  margin-bottom: 16px;
+}
+
+.kpi-container {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.kpi-card {
+  flex: 1;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.kpi-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00587A;
+  line-height: 1.2;
 }

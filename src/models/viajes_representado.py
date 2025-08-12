@@ -7,6 +7,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from .pdf_renderer import render_html, export_pdf_from_html
 from src.config import LOGO_PATH
+from src.services.data_processor import DataProcessor
+# MetricsCalculator eliminado - funcionalidad ya existe en DataProcessor
+from src.constants import Columns, Processing
 
 
 DEFAULT_COLUMNS_ORDER: List[str] = [
@@ -35,6 +38,23 @@ def _build_period_mask(df: pd.DataFrame, periodo: str, fecha_columna: str = "Fec
     return periodo_str == periodo
 
 
+def _normalize_code(value: object) -> str:
+    # Normaliza un código a solo dígitos como string (elimina sufijos .0 y cualquier no dígito)
+    try:
+        text = str(value).strip()
+    except Exception:
+        return ""
+    # Extraer solo dígitos para evitar problemas de ".0" o formatos raros
+    import re
+    digits = re.sub(r"\D", "", text)
+    return digits
+
+
+def _normalize_code_series(series: pd.Series) -> pd.Series:
+    # Aplica normalización de códigos a una serie pandas
+    return series.apply(_normalize_code)
+
+
 def obtener_viajes_representado(
     df: pd.DataFrame,
     codigo_representado: str,
@@ -45,7 +65,9 @@ def obtener_viajes_representado(
     # Devuelve los viajes para un representado y periodo.
     df_filtrado = df.copy()
     mask_periodo = _build_period_mask(df_filtrado, periodo, fecha_columna=columna_fecha)
-    mask_codigo = df_filtrado[columna_agente].astype(str) == str(codigo_representado)
+    codigos_norm = _normalize_code_series(df_filtrado[columna_agente])
+    codigo_norm = _normalize_code(codigo_representado)
+    mask_codigo = codigos_norm == codigo_norm
     return df_filtrado[mask_periodo & mask_codigo]
 
 
@@ -60,7 +82,9 @@ def listar_representados_con_viajes(
     # Retorna una lista de (codigo, nombre) solo para los que viajaron en el período dado.
     df_local = df.copy()
     mask_periodo = _build_period_mask(df_local, periodo, fecha_columna=columna_fecha)
-    mask_codigo = df_local[columna_agente].astype(str).isin([str(c) for c in codigos_representados])
+    serie_codigos = _normalize_code_series(df_local[columna_agente])
+    codigos_busqueda = [_normalize_code(c) for c in codigos_representados]
+    mask_codigo = serie_codigos.isin(codigos_busqueda)
     df_periodo = df_local[mask_periodo & mask_codigo]
 
     if df_periodo.empty:
@@ -178,7 +202,11 @@ def exportar_pdf_viajes(
         "logo_url": str(LOGO_PATH) if (logo_path or LOGO_PATH) else None,
     }
 
-    html = render_html("viajes_report.html", context)
+    # Generar HTML del reporte con diseño claro estándar
+    from src.models.pdf_renderer import build_report_html
+    html = build_report_html(context)
+    
+    # Usar CSS claro estándar para PDFs
     css_path = Path(__file__).parent.parent / "templates" / "report.css"
     return export_pdf_from_html(html, css_path, output_pdf_path)
 
@@ -192,6 +220,7 @@ def generar_pdf_para_representado(
     columnas: Optional[List[str]] = None,
     logo_path: Optional[str] = None,
     downloads_dir: Optional[Path] = None,
+
 ) -> Path:
     # Genera el PDF para un representado específico y retorna la ruta.
     df_viajes = obtener_viajes_representado(df_original, codigo, periodo)
@@ -245,7 +274,9 @@ def generar_tabla_dinamica_resumen(
     # Genera una tabla resumen con cada transporte, su total y cantidad de viajes (solo para representados)
     df_local = df.copy()
     mask_periodo = _build_period_mask(df_local, periodo, fecha_columna=columna_fecha)
-    mask_representados = df_local[columna_agente].astype(str).isin([str(c) for c in codigos_representados])
+    serie_codigos = _normalize_code_series(df_local[columna_agente])
+    codigos_busqueda = [_normalize_code(c) for c in codigos_representados]
+    mask_representados = serie_codigos.isin(codigos_busqueda)
     df_periodo = df_local[mask_periodo & mask_representados]
     
     if df_periodo.empty:

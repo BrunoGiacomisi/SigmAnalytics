@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 
 def get_user_data_directory():
@@ -78,41 +77,26 @@ TAMANO_POPUP_IMG = (850, 550)
 # Configuración del logo de la empresa
 LOGO_SIZE = (160, 160)
 
-# Configuración por defecto
+# Configuración por defecto de la aplicación
 DEFAULT_CONFIG = {
-    "theme": "light",
     "window_size": "1100x700",
     "window_position": None,
     "logo_size": [160, 160],
-    "data_directory": str(USER_DATA_DIR)  # Agregar ruta de datos al config
+    "data_directory": str(USER_DATA_DIR)
 }
 
-# Temas disponibles
-THEMES = {
-    "light": {
-        "bg_color": "#f4f4f4",
-        "frame_color": "#dedbd7",
-        "text_color": "#002B45",
-        "title_color": "#00587A",
-        "accent_color": "#00587A",
-        "hover_color": "#007399",
-        "success_color": "#43a047",
-        "error_color": "#d32f2f",
-        "stats_bg": "#f8fafc",
-        "stats_border": "#b0bec5"
-    },
-    "dark": {
-        "bg_color": "#2d2d2d",
-        "frame_color": "#404040",
-        "text_color": "#e0e0e0",
-        "title_color": "#ffffff",
-        "accent_color": "#4a9eff",
-        "hover_color": "#66b3ff",
-        "success_color": "#4caf50",
-        "error_color": "#f44336",
-        "stats_bg": "#4a4a4a",
-        "stats_border": "#666666"
-    }
+# Colores heredados para compatibilidad (usar design_system.py para nuevos componentes)
+LEGACY_COLORS = {
+    "bg_color": "#2d2d2d",
+    "frame_color": "#404040", 
+    "text_color": "#e0e0e0",
+    "title_color": "#ffffff",
+    "accent_color": "#4a9eff",
+    "hover_color": "#66b3ff",
+    "success_color": "#4caf50",
+    "error_color": "#f44336",
+    "stats_bg": "#4a4a4a",
+    "stats_border": "#666666"
 }
 
 def show_data_directory_info():

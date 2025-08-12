@@ -64,15 +64,7 @@ class ConfigManager:
         # Obtiene la posición de ventana guardada.
         return self.get("window_position", {"x": None, "y": None})
     
-    def get_theme(self) -> str:
-        # Obtiene el tema actual.
-        return self.get("theme", "light")
-    
-    def set_theme(self, theme: str) -> bool:
-        # Establece el tema y lo guarda.
-        if theme in ["light", "dark"]:
-            return self.set("theme", theme)
-        return False
+    # Métodos de tema eliminados - la aplicación usa diseño oscuro fijo
 
 # Instancia global del config manager
 config_manager = ConfigManager() 
