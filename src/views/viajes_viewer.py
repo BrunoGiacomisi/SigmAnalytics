@@ -14,6 +14,7 @@ from src.models.viajes_representado import (
 )
 from src.config import LOGO_PATH
 from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR, is_wkhtmltopdf_available
+from src.views.tabla_dinamica_viewer import abrir_tabla_dinamica_viewer
 
 try:  # WebView para previsualizar HTML (sin depender del navegador)
     from tkinterweb import HtmlFrame  # type: ignore
@@ -61,6 +62,17 @@ class ViajesViewer(ctk.CTkToplevel):
 
         self.btn_export_all = ctk.CTkButton(acciones, text="Exportar todos a PDF", command=self._on_export_all)
         self.btn_export_all.pack(side="left", padx=10)
+
+        # Botón para tabla dinámica
+        self.btn_tabla_dinamica = ctk.CTkButton(
+            acciones, 
+            text="TABLA DINAMICA", 
+            command=self._on_tabla_dinamica,
+            fg_color="#e74c3c",
+            hover_color="#c0392b",
+            font=("Segoe UI", 12, "bold")
+        )
+        self.btn_tabla_dinamica.pack(side="right", padx=10)
 
         # Aviso proactivo si falta wkhtmltopdf
         self._wkhtml_disponible = is_wkhtmltopdf_available()
@@ -215,6 +227,14 @@ class ViajesViewer(ctk.CTkToplevel):
                 messagebox.showinfo("Exportación", "No se generó ningún PDF.")
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def _on_tabla_dinamica(self) -> None:
+        try:
+            # Obtener los códigos de representados desde los items
+            codigos_representados = [codigo for codigo, _ in self.items_cod_nombre]
+            abrir_tabla_dinamica_viewer(self, self.df_original, codigos_representados, self.periodo)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al abrir tabla dinámica: {str(e)}")
 
 
 def abrir_viajes_viewer(master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str) -> None:

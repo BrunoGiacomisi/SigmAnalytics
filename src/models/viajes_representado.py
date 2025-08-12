@@ -233,3 +233,73 @@ def generar_pdf_para_representado(
     return exportar_pdf_viajes(df_viajes_fmt, metadata, output_pdf_path, logo_path=logo_path)
 
 
+def generar_tabla_dinamica_resumen(
+    df: pd.DataFrame,
+    periodo: str,
+    codigos_representados: List[str],
+    columna_agente: str = "Ag.transportista",
+    columna_nombre: str = "Nombre Ag.Transportista",
+    columna_fecha: str = "Fecha ingreso",
+    precio_por_viaje: float = 40.0,
+) -> pd.DataFrame:
+    # Genera una tabla resumen con cada transporte, su total y cantidad de viajes (solo para representados)
+    df_local = df.copy()
+    mask_periodo = _build_period_mask(df_local, periodo, fecha_columna=columna_fecha)
+    mask_representados = df_local[columna_agente].astype(str).isin([str(c) for c in codigos_representados])
+    df_periodo = df_local[mask_periodo & mask_representados]
+    
+    if df_periodo.empty:
+        return pd.DataFrame(columns=["Nombre Ag. Transportista", "Suma de PRECIO", "Cantidad de Viajes"])
+    
+    # Agrupar por agente transportista y contar viajes
+    resumen = df_periodo.groupby([columna_agente, columna_nombre]).size().reset_index(name='Cantidad de Viajes')
+    
+    # Agregar precio total
+    resumen["Suma de PRECIO"] = resumen["Cantidad de Viajes"] * precio_por_viaje
+    
+    # Ordenar por nombre (alfabético por defecto)
+    resumen = resumen.sort_values(columna_nombre)
+    
+    # Reordenar columnas - solo las que necesitamos
+    resumen = resumen[[columna_nombre, "Suma de PRECIO", "Cantidad de Viajes"]]
+    
+    # Renombrar la columna de nombre para que coincida con el formato esperado
+    resumen = resumen.rename(columns={columna_nombre: "Nombre Ag. Transportista"})
+    
+    return resumen
+
+
+def calcular_totales_tabla_dinamica(df_resumen: pd.DataFrame) -> Dict[str, float]:
+    # Calcula los totales generales de la tabla dinámica
+    if df_resumen.empty:
+        return {"total_precio": 0.0, "total_viajes": 0}
+    
+    total_precio = df_resumen["Suma de PRECIO"].sum()
+    total_viajes = df_resumen["Cantidad de Viajes"].sum()
+    
+    return {
+        "total_precio": total_precio,
+        "total_viajes": total_viajes
+    }
+
+
+def ordenar_tabla_dinamica(df_resumen: pd.DataFrame, orden: str = "alfabetico") -> pd.DataFrame:
+    # Ordena la tabla dinámica según el criterio especificado
+    if df_resumen.empty:
+        return df_resumen
+    
+    df_ordenado = df_resumen.copy()
+    
+    if orden == "cantidad_viajes":
+        # Ordenar por cantidad de viajes (mayor a menor)
+        df_ordenado = df_ordenado.sort_values("Cantidad de Viajes", ascending=False)
+    elif orden == "alfabetico":
+        # Ordenar alfabéticamente por nombre
+        df_ordenado = df_ordenado.sort_values("Nombre Ag. Transportista")
+    elif orden == "precio":
+        # Ordenar por precio (mayor a menor)
+        df_ordenado = df_ordenado.sort_values("Suma de PRECIO", ascending=False)
+    
+    return df_ordenado
+
+
