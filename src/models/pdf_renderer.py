@@ -22,8 +22,9 @@ def render_html(template_name: str, context: Dict[str, Any]) -> str:
 
 
 def build_report_html(context: Dict[str, Any]) -> str:
-    # Atajo específico para armar el HTML del reporte de viajes
-    return render_html("viajes_report.html", context)
+    # Genera el HTML del reporte de viajes con diseño claro (estándar para PDFs)
+    context_with_css = {**context, "css_file": "report.css"}
+    return render_html("viajes_report.html", context_with_css)
 
 
 def is_wkhtmltopdf_available() -> bool:

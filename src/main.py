@@ -1,59 +1,66 @@
 import os
 import sys
-from src.models import db
-from src.models import data_loader, analytics
-from src.config import (
-    RUTA_GRAFICO, RUTA_GRAFICO_PROMEDIOS, MANIFESTO_PATH,
-    HISTORICO_DIR, GRAPHS_DIR
-)
+from pathlib import Path
+
+# Imports con manejo de errores
+try:
+    from src.models import data_loader
+    from src.services import AnalyticsService, ChartService
+    from src.constants import Columns
+    from src.config import GRAPHS_DIR
+except ImportError as e:
+    print(f"Error de importación en main.py: {e}")
+    # Fallback para desarrollo
+    sys.path.append(os.path.dirname(__file__))
+    from models import data_loader
+    from services import AnalyticsService, ChartService
+    from constants import Columns
+    from config import GRAPHS_DIR
 
 
 # -----------------------------------------------------------
-# Esta función centraliza todo el procesamiento del manifiesto:
-# cálculo de métricas, actualización de histórico y generación de gráficos
+# Función refactorizada que usa los nuevos servicios
 def _procesar_df(df, codigos: list[str]):
-    # Define columnas clave
-    columna_agente = "Ag.transportista"
-    nombre_agente = "Nombre Ag.Transportista"
-    columna_fecha = "Fecha ingreso"
-
-    # Métricas
-    mediana_rep, mediana_otros = analytics.calcular_mediana_conteo(df, columna_agente, nombre_agente, codigos)
-    promedio_rep, promedio_otros = analytics.calcular_promedio_conteo(df, columna_agente, nombre_agente, codigos)
-    participacion = analytics.calcular_participacion(df, columna_agente, codigos)
-    viajes_representados = df[df[columna_agente].astype(str).isin(codigos)].shape[0]
-
-    # Periodo
-    periodo = db.obtener_periodo_desde_df(df, columna_fecha)
-    periodo_mas_reciente = db.get_periodo_mas_reciente()
-
-    # Preview si corresponde
-    if periodo_mas_reciente is not None and periodo <= periodo_mas_reciente:
-        carpeta_preview = GRAPHS_DIR / "preview"
-        carpeta_preview.mkdir(exist_ok=True)
-        ruta_boxplot_preview = carpeta_preview / "boxplot_conteos.png"
-        ruta_barplot_preview = carpeta_preview / "barplot_representados.png"
-        analytics.generar_boxplot_conteos(df, columna_agente, nombre_agente, codigos, str(ruta_boxplot_preview))
-        analytics.generar_barplot_representados(df, columna_agente, nombre_agente, codigos, mediana_rep, mediana_otros, str(ruta_barplot_preview))
-        return (mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, False, viajes_representados, str(ruta_boxplot_preview), str(ruta_barplot_preview), True)
-
-    # Carpeta por período
-    carpeta_graficos = GRAPHS_DIR / f"graficos_{periodo}"
-    carpeta_graficos.mkdir(exist_ok=True)
-    ruta_boxplot_periodo = carpeta_graficos / "boxplot_conteos.png"
-    ruta_barplot_periodo = carpeta_graficos / "barplot_representados.png"
-
-    actualizado = analytics.actualizar_historico(
-        df, columna_fecha, mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion
+    print("DEBUG: Iniciando _procesar_df")
+    
+    # Inicializar servicios
+    print("DEBUG: Inicializando servicios...")
+    analytics_service = AnalyticsService()
+    chart_service = ChartService()
+    
+    # Procesar datos usando el servicio de análisis
+    print("DEBUG: Procesando datos con AnalyticsService...")
+    result = analytics_service.process_manifest_data(df, codigos)
+    
+    # Extraer datos del resultado
+    print("DEBUG: Extrayendo datos del resultado...")
+    metrics = result['metrics']
+    period = result['period']
+    historical_updated = result['historical_updated']
+    is_preview = result['is_preview']
+    viajes_representados = result['viajes_representados']
+    
+    # Generar gráficos
+    print("DEBUG: Generando gráficos con ChartService...")
+    chart_paths = chart_service.generate_all_charts(
+        df, codigos, metrics, Path(GRAPHS_DIR), period, is_preview
     )
-
-    analytics.generar_grafico_temporal(str(RUTA_GRAFICO))
-    analytics.generar_grafico_promedios_temporal(str(RUTA_GRAFICO_PROMEDIOS))
-
-    analytics.generar_boxplot_conteos(df, columna_agente, nombre_agente, codigos, str(ruta_boxplot_periodo))
-    analytics.generar_barplot_representados(df, columna_agente, nombre_agente, codigos, mediana_rep, mediana_otros, str(ruta_barplot_periodo))
-
-    return (mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, actualizado, viajes_representados, str(ruta_boxplot_periodo), str(ruta_barplot_periodo), False)
+    
+    print("DEBUG: _procesar_df completado exitosamente")
+    
+    # Retornar en el formato esperado (compatibilidad con código existente)
+    return (
+        metrics['mediana_representados'],
+        metrics['mediana_otros'], 
+        metrics['promedio_representados'],
+        metrics['promedio_otros'],
+        metrics['participacion'],
+        historical_updated,
+        viajes_representados,
+        chart_paths['boxplot'],
+        chart_paths['barplot'],
+        is_preview
+    )
 
 
 def procesar_archivo(

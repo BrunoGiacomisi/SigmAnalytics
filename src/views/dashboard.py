@@ -5,26 +5,25 @@ from src.views.viajes_viewer import abrir_viajes_viewer
 from src.models import db as db_model
 from typing import Optional
 from src.config import (
-    RUTA_GRAFICO_PROMEDIOS, TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS,
-    MENSAJE_ARCHIVO_INVALIDO, MENSAJE_PROCESAMIENTO_EXITOSO, MENSAJE_PROCESAMIENTO_ERROR,
-    MENSAJE_ARCHIVO_VALIDO, MENSAJE_ARCHIVO_INVALIDO_ICONO, MENSAJE_ERROR_LECTURA,
-    COLOR_EXITO, COLOR_ERROR, COLOR_TITULO, TAMANO_IMAGEN, TAMANO_POPUP, TAMANO_POPUP_IMG,
-    LOGO_PATH, LOGO_SIZE, show_data_directory_info
+    RUTA_GRAFICO_PROMEDIOS, LOGO_PATH, LOGO_SIZE, TAMANO_IMAGEN, TAMANO_POPUP, TAMANO_POPUP_IMG, show_data_directory_info,
+    TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS
+)
+from src.constants import (
+    ChartTitles, Messages, Colors, UI
 )
 from src.representados import CODIGOS_REPRESENTADOS 
 from src.models.config_manager import config_manager
-from src.models.theme_manager import theme_manager
+from src.models.design_manager import design_manager
+from src.models.design_system import (
+    get_color, get_spacing, get_font_tuple, get_dimension,
+    BUTTON_PRIMARY, BUTTON_SECONDARY, CARD_CONFIG, HEADER_CONFIG
+)
 from PIL import Image, ImageTk  # Para trabajar con imágenes en tkinter
 import os
 import pandas as pd
 import sys
 import threading
-from src.controllers.dashboard_controller import (
-    select_manifest_file,
-    validate_and_load_manifest,
-    process_manifest,
-    compute_period,
-)
+from src.services import FileService
 
 def resource_path(relative_path):
     try:
@@ -36,18 +35,17 @@ def resource_path(relative_path):
 # Función principal que crea y lanza la interfaz gráfica
 def crear_dashboard():
     # Cargar configuración guardada
-    saved_theme = config_manager.get_theme()
     saved_window_size = config_manager.get_window_size()
     saved_position = config_manager.get_window_position()
     
-    # Aplicar tema inicial
-    theme_manager.apply_theme(saved_theme)
+    # El design_manager ya configura modo oscuro automáticamente
     
-    ctk.set_appearance_mode("light" if saved_theme == "light" else "dark")
+    ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("blue")  # Tema azul por defecto
 
     ventana = ctk.CTk()  # Se instancia la ventana principal
     ventana.title("SigmAnalytics")  # Título de la ventana
+    
     # Inicializar base de datos (crear tabla si no existe)
     try:
         db_model.crear_tabla_si_no_existe()
@@ -59,14 +57,18 @@ def crear_dashboard():
     if saved_position and saved_position.get('x') is not None:
         ventana.geometry(f"{saved_window_size}+{saved_position['x']}+{saved_position['y']}")
     
-    ventana.minsize(800, 600)         # Tamaño mínimo para evitar que se rompa el layout
+    ventana.minsize(*UI.MIN_WINDOW_SIZE)  # Usar constante
 
-    # Configura la ventana para que el contenedor scroll ocupe todo
-    ventana.grid_rowconfigure(0, weight=1)
+    # Configurar la ventana para la nueva estructura
+    ventana.grid_rowconfigure(1, weight=1)  # Solo el contenido principal se expande
     ventana.grid_columnconfigure(0, weight=1)
 
     # Diccionario para almacenar widgets que necesitan actualización de tema
+    # Diccionario de widgets simplificado (modo oscuro fijo)
     theme_widgets = {}
+
+    # Obtener colores del sistema de diseño (siempre modo oscuro)
+    colors = design_manager.get_colors()
 
     # --- Funciones auxiliares para separar responsabilidades ---
     
@@ -93,11 +95,39 @@ def crear_dashboard():
             print(f"Error al cargar logo: {e}")
             return ctk.CTkLabel(master=master_frame, text="🏢", font=("Segoe UI", 60), text_color="#002B45")
 
-    def cambiar_tema():
-        # Función para cambiar entre tema claro y oscuro.
-        nuevo_tema = theme_manager.toggle_theme(theme_widgets)
-        # Actualizar texto del botón
-        boton_tema.configure(text=f"🌙 Modo {theme_manager.get_theme_name()}")
+    # Función cambiar_tema eliminada - modo oscuro fijo
+
+    def aplicar_diseno_widgets():
+        # Aplicar diseño estándar a los widgets principales
+        
+        # Header
+        design_manager.apply_widget_design(header_frame, "header_frame")
+        design_manager.apply_widget_design(main_container, "main_container")
+        
+        # Botones
+        design_manager.apply_widget_design(boton, "button_primary")
+        design_manager.apply_widget_design(boton_info_datos, "button_secondary")
+        design_manager.apply_widget_design(boton_viajes, "button_secondary")
+        
+        # Labels y títulos
+        design_manager.apply_widget_design(titulo, "title")
+        design_manager.apply_widget_design(kpi_section_title, "title")
+        design_manager.apply_widget_design(charts_section_title, "title")
+        
+        # KPIs y charts
+        if 'kpi_cards' in theme_widgets:
+            for card in theme_widgets['kpi_cards']:
+                card.configure(
+                    fg_color=colors["card_background"],
+                    border_color=colors["border"]
+                )
+        
+        if 'chart_cards' in theme_widgets:
+            for card in theme_widgets['chart_cards']:
+                card.configure(
+                    fg_color=colors["card_background"],
+                    border_color=colors["border"]
+                )
 
     def mostrar_info_datos():
         # Muestra información sobre dónde se guardan los datos.
@@ -122,7 +152,7 @@ def crear_dashboard():
             frame_info, 
             text="📁 Ubicación de Datos", 
             font=("Segoe UI", 20, "bold"),
-            text_color=theme_manager.get_current_theme_colors()['accent_color']
+            text_color=colors['accent']
         )
         titulo.pack(pady=(20, 10))
         
@@ -143,8 +173,8 @@ def crear_dashboard():
             frame_info,
             text="✅ Entendido",
             command=info_window.destroy,
-            fg_color=theme_manager.get_current_theme_colors()['accent_color'],
-            hover_color=theme_manager.get_current_theme_colors()['hover_color']
+            fg_color=colors['accent'],
+            hover_color=colors['accent_hover']
         )
         boton_cerrar.pack(pady=20)
 
@@ -166,99 +196,180 @@ def crear_dashboard():
     # Configurar evento de cierre de ventana
     ventana.protocol("WM_DELETE_WINDOW", lambda: [guardar_configuracion_ventana(), ventana.destroy()])
 
-    # Contenedor desplazable vertical para todo el contenido del dashboard
-    scroll_container = ctk.CTkScrollableFrame(master=ventana, fg_color="#f4f4f4", corner_radius=0)
-    scroll_container.grid(row=0, column=0, sticky="nsew")
+    # ═══════════════════════════════════════════════════════════════════════════════
+    # BARRA SUPERIOR FIJA
+    # ═══════════════════════════════════════════════════════════════════════════════
+    
+    header_frame = ctk.CTkFrame(
+        master=ventana, 
+        height=get_dimension("header_height"),
+        corner_radius=0,
+        fg_color=colors["card_background"],
+        border_width=1,
+        border_color=colors["border"]
+    )
+    header_frame.grid(row=0, column=0, sticky="ew", padx=0, pady=0)
+    header_frame.grid_propagate(False)  # Mantener altura fija
+    theme_widgets['header_frame'] = header_frame
 
-    # ───────────────────────── Frame superior (título + botón + resultados)
-    frame_principal = ctk.CTkFrame(master=scroll_container, corner_radius=20, fg_color="#dedbd7")
-    frame_principal.pack(fill="x", padx=30, pady=20)
-    theme_widgets['frame_principal'] = frame_principal
-
-    # Frame para el header (logo + título + botones)
-    header_frame = ctk.CTkFrame(master=frame_principal, fg_color="transparent")
-    header_frame.pack(pady=(10, 15), fill="x", padx=20)
+    # Contenedor interno para centrar contenido del header
+    header_content = ctk.CTkFrame(master=header_frame, fg_color="transparent")
+    header_content.pack(fill="both", expand=True, padx=get_spacing("lg"), pady=get_spacing("sm"))
+    
+    # Logo y título (lado izquierdo)
+    left_section = ctk.CTkFrame(master=header_content, fg_color="transparent")
+    left_section.pack(side="left", fill="y")
     
     # Logo de la empresa
-    logo_label = cargar_logo_empresa(header_frame)
-    logo_label.pack(side="left", padx=(0, 15))
+    logo_label = cargar_logo_empresa(left_section)
+    logo_label.pack(side="left", padx=(0, get_spacing("md")))
 
-    # Título simplificado (sin el nombre de la empresa)
-    titulo = ctk.CTkLabel(master=header_frame,
-                          text="SigmAnalytics",
-                          font=("Segoe UI", 22, "bold"),
-                          text_color="#002B45")
-    titulo.pack(side="left", pady=10)
+    # Título de la aplicación
+    titulo = ctk.CTkLabel(
+        master=left_section,
+        text="SigmAnalytics",
+        font=get_font_tuple("title", "bold"),
+        text_color=colors["text_primary"]
+    )
+    titulo.pack(side="left", pady=0)
     theme_widgets['titulo'] = titulo
 
-    # Frame para botones (a la derecha)
-    botones_frame = ctk.CTkFrame(master=header_frame, fg_color="transparent")
-    botones_frame.pack(side="right", padx=(0, 10))
+    # Sección central - Botón principal
+    center_section = ctk.CTkFrame(master=header_content, fg_color="transparent")
+    center_section.pack(side="left", fill="both", expand=True, padx=get_spacing("xl"))
     
-    # Botón de información de datos
+    # El botón principal se agregará después de definir ejecutar_procesamiento()
+    # Por ahora creamos un placeholder
+    boton_principal_placeholder = None
+    
+    # Sección derecha - Botones secundarios
+    right_section = ctk.CTkFrame(master=header_content, fg_color="transparent")
+    right_section.pack(side="right", fill="y")
+    
+    # Botón de información de datos (secundario)
     boton_info_datos = ctk.CTkButton(
-        master=botones_frame,
+        master=right_section,
         text="📁 Datos",
         command=mostrar_info_datos,
-        width=80,
-        height=32,
-        font=("Segoe UI", 11),
-        fg_color=theme_manager.get_current_theme_colors()['accent_color'],
-        hover_color=theme_manager.get_current_theme_colors()['hover_color']
+        width=get_dimension("button_min_width"),
+        **BUTTON_SECONDARY,
+        fg_color=colors["secondary"],
+        hover_color=colors["secondary_hover"],
+        text_color=colors["text_on_primary"]
     )
-    boton_info_datos.pack(side="left", padx=(0, 10))
+    boton_info_datos.pack(side="left", padx=(0, get_spacing("sm")))
     theme_widgets['boton_info_datos'] = boton_info_datos
     
-    # Botón para cambiar tema
-    boton_tema = ctk.CTkButton(
-        master=botones_frame,
-        text=f"🌙 Modo {theme_manager.get_theme_name()}",
-        command=cambiar_tema,
-        width=120,
-        height=32,
-        font=("Segoe UI", 11),
-        fg_color=theme_manager.get_current_theme_colors()['accent_color'],
-        hover_color=theme_manager.get_current_theme_colors()['hover_color']
+    # Botón para cambiar tema (con indicador de estado)
+    # Fijamos modo oscuro y ocultamos el toggle para simplificar
+    # tema_siguiente = "Claro" if is_dark_mode else "Oscuro"
+    # boton_tema = ctk.CTkButton(
+    #     master=right_section,
+    #     text=f"🌙 Modo {tema_siguiente}",
+    #     command=cambiar_tema,
+    #     width=120,
+    #     **BUTTON_SECONDARY,
+    #     fg_color=colors["secondary"],
+    #     hover_color=colors["secondary_hover"],
+    #     text_color=colors["text_on_primary"]
+    # )
+    # boton_tema.pack(side="left")
+    # theme_widgets['boton_tema'] = boton_tema
+
+    # ═══════════════════════════════════════════════════════════════════════════════
+    # CONTENIDO PRINCIPAL SCROLLABLE
+    # ═══════════════════════════════════════════════════════════════════════════════
+    
+    # Contenedor principal con ancho máximo centrado
+    main_container = ctk.CTkScrollableFrame(
+        master=ventana, 
+        fg_color=colors["background"],
+        corner_radius=0
     )
-    boton_tema.pack(side="left")
-    theme_widgets['boton_tema'] = boton_tema
+    main_container.grid(row=1, column=0, sticky="nsew")
+    theme_widgets['main_container'] = main_container
 
-    # Variable para mostrar el nombre del archivo seleccionado
-    archivo_seleccionado = ctk.StringVar(value="Ningún archivo seleccionado")
-    label_archivo = ctk.CTkLabel(master=frame_principal, textvariable=archivo_seleccionado, font=("Segoe UI", 11), text_color="#607d8b")
-    label_archivo.pack(pady=(0, 10), anchor="w", padx=10)
-    theme_widgets['label_archivo'] = label_archivo
+    # Frame contenedor con ancho máximo
+    content_wrapper = ctk.CTkFrame(master=main_container, fg_color="transparent")
+    content_wrapper.pack(fill="x", pady=get_spacing("lg"))
+    
+    # Frame de contenido con ancho máximo centrado
+    content_frame = ctk.CTkFrame(
+        master=content_wrapper, 
+        fg_color="transparent",
+        width=get_dimension("container_max_width")
+    )
+    content_frame.pack(anchor="center", padx=get_spacing("lg"))
 
-    # Variable para feedback visual de validación
+    # ═══════════════════════════════════════════════════════════════════════════════
+    # VARIABLES DE ESTADO Y FEEDBACK
+    # ═══════════════════════════════════════════════════════════════════════════════
+    
+    # Variables para mostrar estado del archivo y feedback
+    archivo_seleccionado = ctk.StringVar(value="")
     feedback_icon = ctk.StringVar(value="")
-    label_feedback = ctk.CTkLabel(master=frame_principal, textvariable=feedback_icon, font=("Segoe UI", 18), text_color="#43a047")
-    label_feedback.pack(pady=(0, 5), anchor="w", padx=10)
-    theme_widgets['label_feedback'] = label_feedback
-
-    # Indicador de carga (spinner)
-    spinner = ctk.CTkLabel(master=frame_principal, text="", font=("Segoe UI", 18), text_color="#007399")
-    spinner.pack(pady=(0, 5), anchor="w", padx=10)
-    theme_widgets['spinner'] = spinner
-
+    
     # Estado del último archivo cargado para abrir el visualizador
     df_cargado: Optional[pd.DataFrame] = None
     periodo_cargado: Optional[str] = None
 
-    # Panel de resumen de estadísticas como tarjeta visual
-    stats_card = ctk.CTkFrame(master=frame_principal, corner_radius=15, fg_color="#f8fafc", border_width=2, border_color="#b0bec5")
-    stats_card.pack(pady=(0, 15), padx=20, fill="x")
-    theme_widgets['stats_card'] = stats_card
+    # ═══════════════════════════════════════════════════════════════════════════════
+    # SECCIÓN DE FEEDBACK Y STATUS (EN EL HEADER)
+    # ═══════════════════════════════════════════════════════════════════════════════
+    
+    # Status del archivo en el centro del header (debajo del botón principal)
+    status_frame = ctk.CTkFrame(master=center_section, fg_color="transparent")
+    status_frame.pack(side="bottom", fill="x", pady=(get_spacing("xs"), 0))
+    
+    # Label para archivo seleccionado
+    label_archivo = ctk.CTkLabel(
+        master=status_frame, 
+        textvariable=archivo_seleccionado, 
+        font=get_font_tuple("sm"),
+        text_color=colors["text_secondary"]
+    )
+    label_archivo.pack()
+    theme_widgets['label_archivo'] = label_archivo
 
-    # Cuadrícula para las estadísticas
-    grid_stats = ctk.CTkFrame(master=stats_card, fg_color="transparent")
-    grid_stats.pack(padx=10, pady=10, fill="x")
+    # Label para feedback
+    label_feedback = ctk.CTkLabel(
+        master=status_frame, 
+        textvariable=feedback_icon, 
+        font=get_font_tuple("sm"),
+        text_color=colors["success"]
+    )
+    label_feedback.pack()
+    theme_widgets['label_feedback'] = label_feedback
 
-    # Título
-    label_titulo_stats = ctk.CTkLabel(master=grid_stats, text="📊 Estadísticas del mes:", font=("Segoe UI", 14, "bold"), text_color="#222831")
-    label_titulo_stats.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 5))
-    theme_widgets['label_titulo_stats'] = label_titulo_stats
-    # Línea divisoria
-    ctk.CTkLabel(master=grid_stats, text="", height=1, fg_color="#888", width=400).grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 8))
+    # Indicador de carga (spinner)
+    spinner = ctk.CTkLabel(
+        master=status_frame, 
+        text="", 
+        font=get_font_tuple("sm"),
+        text_color=colors["info"]
+    )
+    spinner.pack()
+    theme_widgets['spinner'] = spinner
+
+    # ═══════════════════════════════════════════════════════════════════════════════
+    # SECCIÓN DE KPIs (ESTADÍSTICAS DEL MES)
+    # ═══════════════════════════════════════════════════════════════════════════════
+    
+    # Título de la sección
+    kpi_section_title = ctk.CTkLabel(
+        master=content_frame,
+        text="📊 Estadísticas del mes",
+        font=get_font_tuple("xl", "bold"),
+        text_color=colors["text_primary"],
+        anchor="w"
+    )
+    kpi_section_title.pack(fill="x", pady=(0, get_spacing("md")))
+    theme_widgets['kpi_section_title'] = kpi_section_title
+
+    # Contenedor de KPIs en 2 columnas
+    kpi_container = ctk.CTkFrame(master=content_frame, fg_color="transparent")
+    kpi_container.pack(fill="x", pady=(0, get_spacing("xl")))
+    kpi_container.grid_columnconfigure((0, 1), weight=1)
 
     # Variables para los valores
     valor_representados = ctk.StringVar(value="")
@@ -266,49 +377,75 @@ def crear_dashboard():
     valor_participacion = ctk.StringVar(value="")
     valor_viajes = ctk.StringVar(value="")
 
-    # Fila: Representados
-    label_rep = ctk.CTkLabel(master=grid_stats, text="■ Representados:", font=("Segoe UI", 12, "bold"), text_color="#222831")
-    label_rep.grid(row=2, column=0, sticky="w")
-    theme_widgets['label_rep'] = label_rep
-    valor_rep = ctk.CTkLabel(master=grid_stats, textvariable=valor_representados, font=("Segoe UI", 12), text_color="#222831")
-    valor_rep.grid(row=2, column=1, sticky="w")
-    theme_widgets['valor_rep'] = valor_rep
-    
-    # Fila: Otros
-    label_otros = ctk.CTkLabel(master=grid_stats, text="■ Otros:", font=("Segoe UI", 12, "bold"), text_color="#222831")
-    label_otros.grid(row=3, column=0, sticky="w")
-    theme_widgets['label_otros'] = label_otros
-    valor_otros_label = ctk.CTkLabel(master=grid_stats, textvariable=valor_otros, font=("Segoe UI", 12), text_color="#222831")
-    valor_otros_label.grid(row=3, column=1, sticky="w")
-    theme_widgets['valor_otros_label'] = valor_otros_label
-    
-    # Fila: Participación
-    label_participacion = ctk.CTkLabel(master=grid_stats, text="● Participación:", font=("Segoe UI", 12, "bold"), text_color="#222831")
-    label_participacion.grid(row=4, column=0, sticky="w")
-    theme_widgets['label_participacion'] = label_participacion
-    valor_participacion_label = ctk.CTkLabel(master=grid_stats, textvariable=valor_participacion, font=("Segoe UI", 12), text_color="#222831")
-    valor_participacion_label.grid(row=4, column=1, sticky="w")
-    theme_widgets['valor_participacion_label'] = valor_participacion_label
-    
-    # Fila: Viajes
-    label_viajes = ctk.CTkLabel(master=grid_stats, text="🚚 Viajes de representados:", font=("Segoe UI", 12, "bold"), text_color="#222831")
-    label_viajes.grid(row=5, column=0, sticky="w")
-    theme_widgets['label_viajes'] = label_viajes
-    valor_viajes_label = ctk.CTkLabel(master=grid_stats, textvariable=valor_viajes, font=("Segoe UI", 12), text_color="#222831")
-    valor_viajes_label.grid(row=5, column=1, sticky="w")
-    theme_widgets['valor_viajes_label'] = valor_viajes_label
+    # Función para crear tarjeta KPI
+    def crear_kpi_card(parent, title: str, value_var: ctk.StringVar, row: int, col: int):
+        card = ctk.CTkFrame(
+            master=parent,
+            corner_radius=get_dimension("border_radius_lg"),
+            fg_color=colors["card_background"],
+            border_width=1,
+            border_color=colors["border"]
+        )
+        card.grid(row=row, column=col, sticky="ew", padx=get_spacing("sm"), pady=get_spacing("sm"))
+        
+        # Título de la métrica
+        title_label = ctk.CTkLabel(
+            master=card,
+            text=title,
+            font=get_font_tuple("sm", "bold"),
+            text_color=colors["text_secondary"],
+            anchor="w"
+        )
+        title_label.pack(fill="x", padx=get_spacing("md"), pady=(get_spacing("md"), get_spacing("xs")))
+        
+        # Valor de la métrica
+        value_label = ctk.CTkLabel(
+            master=card,
+            textvariable=value_var,
+            font=get_font_tuple("lg", "bold"),
+            text_color=colors["text_primary"],
+            anchor="w"
+        )
+        value_label.pack(fill="x", padx=get_spacing("md"), pady=(0, get_spacing("md")))
+        
+        return card, title_label, value_label
 
-    # Mensaje de histórico actualizado
-    label_historial = ctk.CTkLabel(master=frame_principal, text="", font=("Segoe UI", 11), text_color="#607d8b")
-    label_historial.pack(pady=(0, 10), anchor="w", padx=10)
+    # Crear tarjetas KPI
+    kpi_cards = {}
+    
+    # Fila 1
+    card_rep, title_rep, valor_rep = crear_kpi_card(kpi_container, "💰 Representados", valor_representados, 0, 0)
+    card_otros, title_otros, valor_otros_label = crear_kpi_card(kpi_container, "🏢 Otros", valor_otros, 0, 1)
+    
+    # Fila 2  
+    card_part, title_part, valor_participacion_label = crear_kpi_card(kpi_container, "📈 Participación", valor_participacion, 1, 0)
+    card_viajes, title_viajes, valor_viajes_label = crear_kpi_card(kpi_container, "🚚 Viajes", valor_viajes, 1, 1)
+
+    # Guardar referencias para el tema
+    theme_widgets.update({
+        'kpi_cards': [card_rep, card_otros, card_part, card_viajes],
+        'kpi_titles': [title_rep, title_otros, title_part, title_viajes],
+        'kpi_values': [valor_rep, valor_otros_label, valor_participacion_label, valor_viajes_label]
+    })
+
+    # Mensaje de histórico (debajo de los KPIs)
+    label_historial = ctk.CTkLabel(
+        master=content_frame, 
+        text="", 
+        font=get_font_tuple("sm"),
+        text_color=colors["text_secondary"],
+        anchor="w"
+    )
+    label_historial.pack(fill="x", pady=(get_spacing("sm"), get_spacing("lg")))
     theme_widgets['label_historial'] = label_historial
 
     def validar_y_cargar_archivo(ruta_archivo: str) -> pd.DataFrame:
-        # Centraliza validación usando el controller
+        # Usar FileService para validación
         try:
-            return validate_and_load_manifest(ruta_archivo)
+            file_service = FileService()
+            return file_service.validate_and_load_manifest(ruta_archivo)
         except ValueError:
-            raise ValueError(MENSAJE_ARCHIVO_INVALIDO)
+            raise ValueError(Messages.ARCHIVO_INVALIDO)
 
     def actualizar_panel_resultados(
         mediana_rep: float,
@@ -319,11 +456,30 @@ def crear_dashboard():
         viajes_representados: int,
         actualizado: bool
     ) -> None:
-        valor_representados.set(f"{mediana_rep:.2f} (mediana) | {promedio_rep:.2f} (promedio)")
-        valor_otros.set(f"{mediana_otros:.2f} (mediana) | {promedio_otros:.2f} (promedio)")
-        valor_participacion.set(f"{participacion:.2f}%")
-        valor_viajes.set(f"{viajes_representados}")
-        label_historial.configure(text="✓ Histórico actualizado." if actualizado else "ℹ Ya existía un registro para ese período.")
+        # Función helper para formatear números con separador de miles
+        def format_number(num: float) -> str:
+            if num == int(num):  # Si es entero, no mostrar decimales
+                return f"{int(num):,}".replace(",", ".")
+            else:  # Si tiene decimales, mostrar máximo 2
+                return f"{num:.2f}".replace(".", ",").replace(",", ".", 1)
+        
+        # Formatear valores monetarios con separador de miles
+        mediana_rep_fmt = format_number(mediana_rep)
+        promedio_rep_fmt = format_number(promedio_rep)
+        mediana_otros_fmt = format_number(mediana_otros)
+        promedio_otros_fmt = format_number(promedio_otros)
+        
+        # Actualizar KPIs con formato mejorado
+        valor_representados.set(f"{mediana_rep_fmt} (mediana) | {promedio_rep_fmt} (promedio)")
+        valor_otros.set(f"{mediana_otros_fmt} (mediana) | {promedio_otros_fmt} (promedio)")
+        valor_participacion.set(f"{participacion:.1f}%")  # Solo 1 decimal para porcentajes
+        valor_viajes.set(f"{viajes_representados:,} viajes".replace(",", "."))  # Agregar "viajes" y separador
+        
+        # Mensaje de histórico más claro
+        if actualizado:
+            label_historial.configure(text="✅ Histórico actualizado correctamente")
+        else:
+            label_historial.configure(text="ℹ️ Período ya existente en el histórico")
 
     # Muestra una imagen desde una ruta en el label correspondiente
     def mostrar_imagen(ruta: str, etiqueta: ctk.CTkLabel) -> None:
@@ -361,7 +517,10 @@ def crear_dashboard():
         try:
             boton.configure(state='disabled')
             spinner.configure(text="⏳ Procesando...")
-            ruta_archivo = select_manifest_file()
+            
+            # Usar FileService
+            file_service = FileService()
+            ruta_archivo = file_service.select_manifest_file()
             if not ruta_archivo:
                 feedback_icon.set("")
                 spinner.configure(text="")
@@ -376,27 +535,27 @@ def crear_dashboard():
                         df_local = validar_y_cargar_archivo(ruta_archivo)
                     except Exception:
                         def on_invalid():
-                            feedback_icon.set(MENSAJE_ARCHIVO_INVALIDO_ICONO)
-                            label_feedback.configure(text_color=COLOR_ERROR)
+                            feedback_icon.set(Messages.ARCHIVO_INVALIDO_ICONO)
+                            label_feedback.configure(text_color=Colors.ERROR)
                             spinner.configure(text="")
                             boton.configure(state='normal')
-                            messagebox.showerror("Error al procesar", MENSAJE_ARCHIVO_INVALIDO)
+                            messagebox.showerror("Error al procesar", Messages.ARCHIVO_INVALIDO)
                         ventana.after(0, on_invalid)
                         return
 
                     # 2) Procesamiento pesado
-                    resultado = process_manifest(ruta_archivo, CODIGOS_REPRESENTADOS, df=df_local)
+                    resultado = file_service.process_manifest_file(ruta_archivo, CODIGOS_REPRESENTADOS, df=df_local)
                     mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, actualizado, viajes_representados, ruta_boxplot_periodo, ruta_barplot_periodo, es_preview = resultado
 
                     # 3) Calcular periodo para el viewer
-                    periodo_local = compute_period(df_local, "Fecha ingreso")
+                    periodo_local = file_service.compute_period(df_local)
 
                     def on_success():
                         nonlocal df_cargado, periodo_cargado
                         df_cargado = df_local
                         periodo_cargado = periodo_local
-                        feedback_icon.set(MENSAJE_PROCESAMIENTO_EXITOSO if not es_preview else "ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
-                        label_feedback.configure(text_color=(COLOR_EXITO if not es_preview else "#e67e22"))
+                        feedback_icon.set(Messages.PROCESAMIENTO_EXITOSO if not es_preview else "ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
+                        label_feedback.configure(text_color=(Colors.SUCCESS if not es_preview else "#e67e22"))
                         actualizar_panel_resultados(mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, viajes_representados, actualizado)
                         mostrar_imagen(ruta_boxplot_periodo, etiqueta_imagen_boxplot)
                         mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
@@ -410,8 +569,8 @@ def crear_dashboard():
 
                 except Exception as e:
                     def on_error():
-                        feedback_icon.set(MENSAJE_PROCESAMIENTO_ERROR)
-                        label_feedback.configure(text_color=COLOR_ERROR)
+                        feedback_icon.set(Messages.PROCESAMIENTO_ERROR)
+                        label_feedback.configure(text_color=Colors.ERROR)
                         spinner.configure(text="")
                         boton.configure(state='normal')
                         messagebox.showerror("Error al procesar", str(e))
@@ -424,14 +583,18 @@ def crear_dashboard():
             boton.configure(state='normal')
             messagebox.showerror("Error inesperado", str(e))
 
-    # Botón para ejecutar el procesamiento del archivo (debe ir después de definir ejecutar_procesamiento)
-    boton = ctk.CTkButton(master=frame_principal,
-                          text="Seleccionar archivo y procesar manifiesto",
-                          command=ejecutar_procesamiento,  # Acción al hacer click
-                          fg_color="#00587A",
-                          hover_color="#007399",
-                          font=("Segoe UI", 13, "bold"))
-    boton.pack(pady=5)
+    # Agregar el botón principal al header ahora que ejecutar_procesamiento está definido
+    boton = ctk.CTkButton(
+        master=center_section,
+        text="Seleccionar archivo y procesar manifiesto",
+        command=ejecutar_procesamiento,
+        **BUTTON_PRIMARY,
+        fg_color=colors["primary"],
+        hover_color=colors["primary_hover"],
+        text_color=colors["text_on_primary"],
+        width=320  # Ancho fijo para el botón principal
+    )
+    boton.pack(anchor="center", pady=get_spacing("sm"))
     theme_widgets['boton'] = boton
 
     # Botón para abrir el visualizador de viajes por representado
@@ -444,50 +607,105 @@ def crear_dashboard():
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
+    # Botón "Viajes por Representado" también en el header (lado derecho)
     boton_viajes = ctk.CTkButton(
-        master=frame_principal,
+        master=right_section,
         text="Viajes por Representado",
         command=abrir_visualizador,
-        fg_color="#4a9eff",
-        hover_color="#66b3ff",
-        font=("Segoe UI", 12, "bold"),
-        state='disabled'
+        **BUTTON_SECONDARY,
+        fg_color=colors["info"],
+        hover_color=colors["primary_hover"],
+        text_color=colors["text_on_primary"],
+        state='disabled',
+        width=160
     )
-    boton_viajes.pack(pady=(0, 10))
+    boton_viajes.pack(side="left", padx=(get_spacing("sm"), 0))
     theme_widgets['boton_viajes'] = boton_viajes
 
-    # ───────────────────────── Frame inferior (donde van las imágenes de los gráficos)
-    # Frame contenedor para centrar el área de gráficos
-    frame_graficos_outer = ctk.CTkFrame(master=scroll_container, fg_color="#f4f4f4")
-    frame_graficos_outer.pack(fill="both", expand=True)
-    frame_graficos_outer.grid_columnconfigure(0, weight=1)
-    theme_widgets['frame_graficos_outer'] = frame_graficos_outer
+    # ═══════════════════════════════════════════════════════════════════════════════
+    # SECCIÓN DE GRÁFICOS
+    # ═══════════════════════════════════════════════════════════════════════════════
+    
+    # Título de la sección
+    charts_section_title = ctk.CTkLabel(
+        master=content_frame,
+        text="📈 Análisis Gráfico",
+        font=get_font_tuple("xl", "bold"),
+        text_color=colors["text_primary"],
+        anchor="w"
+    )
+    charts_section_title.pack(fill="x", pady=(0, get_spacing("md")))
+    theme_widgets['charts_section_title'] = charts_section_title
 
-    # Frame de gráficos con ancho máximo
-    frame_graficos = ctk.CTkFrame(master=frame_graficos_outer, corner_radius=20, fg_color="#f4f4f4", width=900)
-    frame_graficos.grid(row=0, column=0, pady=10)
+    # Contenedor de gráficos en 3 columnas
+    frame_graficos = ctk.CTkFrame(master=content_frame, fg_color="transparent")
+    frame_graficos.pack(fill="x", pady=(0, get_spacing("xl")))
     frame_graficos.grid_columnconfigure((0, 1, 2), weight=1)
-    frame_graficos.grid_rowconfigure((0, 1, 2), weight=1)
     theme_widgets['frame_graficos'] = frame_graficos
 
-    # Etiquetas para mostrar los gráficos cargados
-    etiqueta_titulo_boxplot = ctk.CTkLabel(master=frame_graficos, text=TITULO_BOXPLOT, font=("Segoe UI", 13, "bold"), text_color=theme_manager.get_current_theme_colors()['title_color'])
-    etiqueta_titulo_boxplot.grid(row=0, column=0, padx=10, pady=(0,5), sticky="nsew")
-    theme_widgets['etiqueta_titulo_boxplot'] = etiqueta_titulo_boxplot
-    etiqueta_imagen_boxplot = ctk.CTkLabel(master=frame_graficos, text="")
-    etiqueta_imagen_boxplot.grid(row=1, column=0, padx=10, sticky="nsew")
+    # Función para crear tarjeta de gráfico uniforme
+    def crear_chart_card(parent, title: str, col: int):
+        # Tarjeta contenedora
+        card = ctk.CTkFrame(
+            master=parent,
+            corner_radius=get_dimension("border_radius_lg"),
+            fg_color=colors["card_background"],
+            border_width=1,
+            border_color=colors["border"],
+            height=300  # Altura uniforme
+        )
+        card.grid(row=0, column=col, sticky="nsew", padx=get_spacing("sm"), pady=get_spacing("sm"))
+        card.grid_propagate(False)  # Mantener altura fija
+        
+        # Header de la tarjeta
+        header = ctk.CTkFrame(master=card, fg_color="transparent", height=40)
+        header.pack(fill="x", padx=get_spacing("md"), pady=(get_spacing("md"), 0))
+        header.pack_propagate(False)
+        
+        # Título del gráfico
+        title_label = ctk.CTkLabel(
+            master=header,
+            text=title,
+            font=get_font_tuple("md", "bold"),
+            text_color=colors["text_primary"],
+            anchor="w"
+        )
+        title_label.pack(side="left", fill="both", expand=True)
+        
+        # Botón "Ampliar" en la esquina superior derecha
+        ampliar_btn = ctk.CTkButton(
+            master=header,
+            text="🔍 Ampliar",
+            width=80,
+            height=28,
+            font=get_font_tuple("xs"),
+            fg_color=colors["secondary"],
+            hover_color=colors["secondary_hover"],
+            text_color=colors["text_on_primary"]
+        )
+        ampliar_btn.pack(side="right")
+        
+        # Área del gráfico
+        chart_area = ctk.CTkLabel(
+            master=card,
+            text="",
+            fg_color="transparent"
+        )
+        chart_area.pack(fill="both", expand=True, padx=get_spacing("md"), pady=(get_spacing("sm"), get_spacing("md")))
+        
+        return card, title_label, ampliar_btn, chart_area
 
-    etiqueta_titulo_barras = ctk.CTkLabel(master=frame_graficos, text=TITULO_BARRAS, font=("Segoe UI", 13, "bold"), text_color=theme_manager.get_current_theme_colors()['title_color'])
-    etiqueta_titulo_barras.grid(row=0, column=1, padx=10, pady=(0,5), sticky="nsew")
-    theme_widgets['etiqueta_titulo_barras'] = etiqueta_titulo_barras
-    etiqueta_imagen_barras = ctk.CTkLabel(master=frame_graficos, text="")
-    etiqueta_imagen_barras.grid(row=1, column=1, padx=10, sticky="nsew")
+    # Crear tarjetas de gráficos
+    card_boxplot, titulo_boxplot, btn_boxplot, etiqueta_imagen_boxplot = crear_chart_card(frame_graficos, TITULO_BOXPLOT, 0)
+    card_barras, titulo_barras, btn_barras, etiqueta_imagen_barras = crear_chart_card(frame_graficos, TITULO_BARRAS, 1)
+    card_promedios, titulo_promedios, btn_promedios, etiqueta_imagen_promedios = crear_chart_card(frame_graficos, TITULO_PROMEDIOS, 2)
 
-    etiqueta_titulo_promedios = ctk.CTkLabel(master=frame_graficos, text=TITULO_PROMEDIOS, font=("Segoe UI", 13, "bold"), text_color=theme_manager.get_current_theme_colors()['title_color'])
-    etiqueta_titulo_promedios.grid(row=0, column=2, padx=10, pady=(0,5), sticky="nsew")
-    theme_widgets['etiqueta_titulo_promedios'] = etiqueta_titulo_promedios
-    etiqueta_imagen_promedios = ctk.CTkLabel(master=frame_graficos, text="")
-    etiqueta_imagen_promedios.grid(row=1, column=2, padx=10, sticky="nsew")
+    # Guardar referencias para el tema
+    theme_widgets.update({
+        'chart_cards': [card_boxplot, card_barras, card_promedios],
+        'chart_titles': [titulo_boxplot, titulo_barras, titulo_promedios],
+        'chart_buttons': [btn_boxplot, btn_barras, btn_promedios]
+    })
 
     # Referencias a las imágenes para evitar que el recolector de basura las elimine
     referencia_imagen_boxplot = None
@@ -503,24 +721,16 @@ def crear_dashboard():
         ruta_boxplot_actual = ruta_boxplot
         ruta_barplot_actual = ruta_barplot
 
-    # Botones para ampliar gráficos (comandos usan las rutas actuales)
-    boton_ampliar_boxplot = ctk.CTkButton(master=frame_graficos, text="Ampliar", width=80, command=lambda: mostrar_imagen_ampliada(ruta_boxplot_actual))
-    boton_ampliar_boxplot.grid(row=2, column=0, pady=(5, 10), sticky="n")
-    theme_widgets['boton_ampliar_boxplot'] = boton_ampliar_boxplot
-    
-    boton_ampliar_barras = ctk.CTkButton(master=frame_graficos, text="Ampliar", width=80, command=lambda: mostrar_imagen_ampliada(ruta_barplot_actual))
-    boton_ampliar_barras.grid(row=2, column=1, pady=(5, 10), sticky="n")
-    theme_widgets['boton_ampliar_barras'] = boton_ampliar_barras
-    
-    boton_ampliar_promedios = ctk.CTkButton(master=frame_graficos, text="Ampliar", width=80, command=lambda: mostrar_imagen_ampliada(RUTA_GRAFICO_PROMEDIOS))
-    boton_ampliar_promedios.grid(row=2, column=2, pady=(5, 10), sticky="n")
-    theme_widgets['boton_ampliar_promedios'] = boton_ampliar_promedios
+    # Conectar los botones de ampliar con las funciones existentes
+    btn_boxplot.configure(command=lambda: mostrar_imagen_ampliada(ruta_boxplot_actual))
+    btn_barras.configure(command=lambda: mostrar_imagen_ampliada(ruta_barplot_actual))
+    btn_promedios.configure(command=lambda: mostrar_imagen_ampliada(RUTA_GRAFICO_PROMEDIOS))
 
     # Eliminar binds de click en las imágenes
 
     # Aplicar tema inicial a todos los widgets
+    # Aplicar estilos iniciales (modo oscuro fijo)
     theme_widgets['ventana'] = ventana
-    theme_manager.update_widget_colors(theme_widgets)
 
     ventana.mainloop()  # Lanza la ventana
 

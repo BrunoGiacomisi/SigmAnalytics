@@ -15,6 +15,11 @@ from src.models.viajes_representado import (
 from src.config import LOGO_PATH
 from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR, is_wkhtmltopdf_available
 from src.views.tabla_dinamica_viewer import abrir_tabla_dinamica_viewer
+from src.models.design_system import (
+    get_color, get_spacing, get_font_tuple, get_dimension,
+    BUTTON_PRIMARY, BUTTON_SECONDARY, CARD_CONFIG
+)
+from src.models.design_manager import design_manager
 
 try:  # WebView para previsualizar HTML (sin depender del navegador)
     from tkinterweb import HtmlFrame  # type: ignore
@@ -28,7 +33,7 @@ class ViajesViewer(ctk.CTkToplevel):
     def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str):
         super().__init__(master)
         self.title("Viajes por Representado")
-        self.geometry("900x600")
+        self.geometry("1200x800")  # Tamaño más grande para mejor experiencia
         self.resizable(True, True)
 
         self.df_original = df_original
@@ -36,43 +41,138 @@ class ViajesViewer(ctk.CTkToplevel):
         self.items_cod_nombre = listar_representados_con_viajes(df_original, codigos_representados, periodo)
         self.periodo = periodo
 
-        # UI: controles superiores
-        header = ctk.CTkFrame(self)
-        header.pack(fill="x", padx=10, pady=(10, 5))
+        # Obtener colores del sistema de diseño
+        self.colors = design_manager.get_colors()
+        
+        # Variables para estadísticas que se mostrarán en KPIs
+        self.stats_vars = {
+            'total_viajes': ctk.StringVar(value="0"),
+            'monto_total': ctk.StringVar(value="$ 0"),
+            'precio_promedio': ctk.StringVar(value="$ 0"),
+            'representado_actual': ctk.StringVar(value="")
+        }
 
-        ctk.CTkLabel(header, text="Representado:").pack(side="left", padx=(10, 5))
+        self._crear_ui()
+        self._actualizar_preview()
+
+    def _crear_ui(self):
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # HEADER CON CONTROLES Y KPIS
+        # ═══════════════════════════════════════════════════════════════════════════════
+        
+        header_frame = ctk.CTkFrame(
+            self,
+            fg_color=self.colors["card_background"],
+            corner_radius=get_dimension("border_radius")
+        )
+        header_frame.pack(fill="x", padx=get_spacing("md"), pady=(get_spacing("md"), get_spacing("sm")))
+
+        # Título de la sección
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="📋 Viajes por Representado",
+            font=get_font_tuple("xl", "bold"),
+            text_color=self.colors["text_primary"]
+        )
+        title_label.pack(pady=(get_spacing("md"), get_spacing("sm")))
+
+        # Selector de representado
+        selector_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        selector_frame.pack(fill="x", padx=get_spacing("md"), pady=(0, get_spacing("sm")))
+
+        ctk.CTkLabel(
+            selector_frame, 
+            text="Representado:",
+            font=get_font_tuple("base", "bold"),
+            text_color=self.colors["text_primary"]
+        ).pack(side="left", padx=(0, get_spacing("sm")))
+
+        # ComboBox para seleccionar representado
         display_names = [name for _, name in self.items_cod_nombre]
         default_value = display_names[0] if display_names else ""
         self.display_var = ctk.StringVar(value=default_value)
         self.codigo_por_nombre = {name: code for code, name in self.items_cod_nombre}
         self.codigo_combo = ctk.CTkComboBox(
-            header,
+            selector_frame,
             values=display_names,
             variable=self.display_var,
             width=320,
             command=self._on_combo_change,
+            font=get_font_tuple("base"),
+            fg_color=self.colors["card_background"],
+            border_color=self.colors["border"]
         )
         self.codigo_combo.pack(side="left")
 
-        acciones = ctk.CTkFrame(self)
-        acciones.pack(fill="x", padx=10, pady=5)
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # BARRA DE KPIs (RESUMEN DE TOTALES)
+        # ═══════════════════════════════════════════════════════════════════════════════
+        
+        kpi_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        kpi_frame.pack(fill="x", padx=get_spacing("md"), pady=(get_spacing("md"), get_spacing("md")))
+        kpi_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
-        self.btn_export = ctk.CTkButton(acciones, text="Exportar a PDF", command=self._on_export)
-        self.btn_export.pack(side="left", padx=10)
+        # Crear KPIs individuales
+        self._crear_kpi_card(kpi_frame, "🚚 Total Viajes", self.stats_vars['total_viajes'], 0, 0)
+        self._crear_kpi_card(kpi_frame, "💰 Monto Total", self.stats_vars['monto_total'], 0, 1)
+        self._crear_kpi_card(kpi_frame, "📊 Precio Promedio", self.stats_vars['precio_promedio'], 0, 2)
+        self._crear_kpi_card(kpi_frame, "👤 Representado", self.stats_vars['representado_actual'], 0, 3)
 
-        self.btn_export_all = ctk.CTkButton(acciones, text="Exportar todos a PDF", command=self._on_export_all)
-        self.btn_export_all.pack(side="left", padx=10)
-
-        # Botón para tabla dinámica
-        self.btn_tabla_dinamica = ctk.CTkButton(
-            acciones, 
-            text="TABLA DINAMICA", 
-            command=self._on_tabla_dinamica,
-            fg_color="#e74c3c",
-            hover_color="#c0392b",
-            font=("Segoe UI", 12, "bold")
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # BARRA DE ACCIONES CON SPLIT BUTTON
+        # ═══════════════════════════════════════════════════════════════════════════════
+        
+        acciones_frame = ctk.CTkFrame(
+            self,
+            fg_color=self.colors["card_background"],
+            corner_radius=get_dimension("border_radius")
         )
-        self.btn_tabla_dinamica.pack(side="right", padx=10)
+        acciones_frame.pack(fill="x", padx=get_spacing("md"), pady=(0, get_spacing("sm")))
+
+        # Frame interno para botones
+        buttons_frame = ctk.CTkFrame(acciones_frame, fg_color="transparent")
+        buttons_frame.pack(fill="x", padx=get_spacing("md"), pady=get_spacing("sm"))
+
+        # Split button de exportación (lado izquierdo)
+        export_frame = ctk.CTkFrame(buttons_frame, fg_color="transparent")
+        export_frame.pack(side="left")
+
+        self.btn_export = ctk.CTkButton(
+            export_frame,
+            text="📄 Exportar PDF",
+            command=self._on_export,
+            **BUTTON_SECONDARY,
+            fg_color=self.colors["primary"],
+            hover_color=self.colors["primary_hover"],
+            text_color=self.colors["text_on_primary"],
+            width=140
+        )
+        self.btn_export.pack(side="left", padx=(0, get_spacing("xs")))
+
+        self.btn_export_all = ctk.CTkButton(
+            export_frame,
+            text="📁 Todos PDF",
+            command=self._on_export_all,
+            **BUTTON_SECONDARY,
+            fg_color=self.colors["secondary"],
+            hover_color=self.colors["secondary_hover"],
+            text_color=self.colors["text_on_primary"],
+            width=120
+        )
+        self.btn_export_all.pack(side="left")
+
+        # Botón tabla dinámica (lado derecho)
+        self.btn_tabla_dinamica = ctk.CTkButton(
+            buttons_frame,
+            text="📊 TABLA DINAMICA",
+            command=self._on_tabla_dinamica,
+            **BUTTON_SECONDARY,
+            fg_color=self.colors["accent"],
+            hover_color=self.colors["accent_hover"],
+            text_color=self.colors["text_on_primary"],
+            width=160
+        )
+        self.btn_tabla_dinamica.pack(side="right")
 
         # Aviso proactivo si falta wkhtmltopdf
         self._wkhtml_disponible = is_wkhtmltopdf_available()
@@ -80,7 +180,7 @@ class ViajesViewer(ctk.CTkToplevel):
             self.btn_export.configure(state="disabled")
             self.btn_export_all.configure(state="disabled")
             aviso = ctk.CTkLabel(
-                acciones,
+                acciones_frame,
                 text=(
                     "⚠ wkhtmltopdf no está disponible. Instalalo o setea WKHTMLTOPDF_BINARY/WKHTMLTOPDF_PATH "
                     "para habilitar la exportación a PDF."
@@ -105,7 +205,7 @@ class ViajesViewer(ctk.CTkToplevel):
 
         # Traer ventana al frente y enfocar
         try:
-            self.transient(master)
+            self.transient(self.master)
             self.attributes('-topmost', True)
             self.lift()
             self.focus_force()
@@ -113,7 +213,76 @@ class ViajesViewer(ctk.CTkToplevel):
         except Exception:
             pass
 
-        self._on_preview()
+        self._actualizar_preview()
+
+    def _crear_kpi_card(self, parent, title: str, value_var: ctk.StringVar, row: int, col: int):
+        """Crear una tarjeta KPI individual"""
+        card = ctk.CTkFrame(
+            master=parent,
+            corner_radius=get_dimension("border_radius"),
+            fg_color=self.colors["surface"],
+            border_width=1,
+            border_color=self.colors["border_light"],
+            height=80
+        )
+        card.grid(row=row, column=col, sticky="ew", padx=get_spacing("xs"), pady=0)
+        card.grid_propagate(False)
+        
+        # Título de la métrica
+        title_label = ctk.CTkLabel(
+            master=card,
+            text=title,
+            font=get_font_tuple("xs", "bold"),
+            text_color=self.colors["text_secondary"],
+            anchor="w"
+        )
+        title_label.pack(fill="x", padx=get_spacing("sm"), pady=(get_spacing("sm"), 0))
+        
+        # Valor de la métrica
+        value_label = ctk.CTkLabel(
+            master=card,
+            textvariable=value_var,
+            font=get_font_tuple("md", "bold"),
+            text_color=self.colors["text_primary"],
+            anchor="w"
+        )
+        value_label.pack(fill="x", padx=get_spacing("sm"), pady=(0, get_spacing("sm")))
+        
+        return card
+
+    def _actualizar_preview(self):
+        """Actualizar KPIs y vista previa de tabla"""
+        try:
+            df = self._collect_current_df()
+            self._actualizar_kpis(df)
+            self._render_preview(df)
+        except Exception as e:
+            print(f"Error actualizando preview: {e}")
+
+    def _actualizar_kpis(self, df: pd.DataFrame):
+        """Actualizar los valores de los KPIs"""
+        if df.empty:
+            self.stats_vars['total_viajes'].set("0")
+            self.stats_vars['monto_total'].set("$ 0")
+            self.stats_vars['precio_promedio'].set("$ 0")
+            self.stats_vars['representado_actual'].set("Sin selección")
+        else:
+            # Calcular estadísticas
+            total_viajes = len(df)
+            stats = calcular_estadisticas_viajes(df)
+            # Keys válidas según calcular_estadisticas_viajes
+            monto_total = stats.get("total", 0)
+            precio_promedio = stats.get("precio_por_viaje", 0)
+            
+            # Formatear valores con separador de miles
+            def format_currency(value):
+                return f"$ {value:,.0f}".replace(",", ".")
+            
+            # Actualizar variables
+            self.stats_vars['total_viajes'].set(f"{total_viajes:,} viajes".replace(",", "."))
+            self.stats_vars['monto_total'].set(format_currency(monto_total))
+            self.stats_vars['precio_promedio'].set(format_currency(precio_promedio))
+            self.stats_vars['representado_actual'].set(self.display_var.get() or "Sin selección")
 
     def _render_preview(self, df: pd.DataFrame) -> None:
         # Renderiza HTML de la plantilla para previsualizar con el mismo diseño del PDF
@@ -165,16 +334,9 @@ class ViajesViewer(ctk.CTkToplevel):
         df_viajes_fmt = formatear_datos_para_visualizacion(df_viajes)
         return df_viajes_fmt
 
-    def _on_preview(self) -> None:
-        try:
-            df = self._collect_current_df()
-            self._render_preview(df)
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-
     def _on_combo_change(self, _value: str) -> None:
         # Actualiza previsualización inmediatamente al cambiar selección
-        self._on_preview()
+        self._actualizar_preview()
 
     def _on_export(self) -> None:
         try:
@@ -191,6 +353,7 @@ class ViajesViewer(ctk.CTkToplevel):
                 precio_por_viaje=stats["precio_por_viaje"],
                 columnas=DEFAULT_COLUMNS_ORDER,
                 logo_path=str(LOGO_PATH),
+
             )
             messagebox.showinfo("Exportación", "PDF generado en la carpeta descargas")
         except Exception as e:
@@ -219,6 +382,7 @@ class ViajesViewer(ctk.CTkToplevel):
                     precio_por_viaje=stats["precio_por_viaje"],
                     columnas=DEFAULT_COLUMNS_ORDER,
                     logo_path=str(LOGO_PATH),
+    
                 )
                 generados.append(str(ruta_pdf))
             if generados:
