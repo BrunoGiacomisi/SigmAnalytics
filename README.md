@@ -6,7 +6,6 @@ Sistema de análisis y visualización de datos de manifiestos para SIGMA CARGO, 
 
 - **Análisis de datos**: Procesamiento automático de archivos Excel de manifiestos
 - **Visualización**: Generación de gráficos (boxplot, barras, series temporales)
-- **Temas**: Modo claro y oscuro con persistencia de preferencias
 - **Configuración**: Guardado automático de tamaño y posición de ventana
 - **Base de datos**: Almacenamiento de histórico de análisis
 - **Validación**: Verificación automática de archivos y periodos
