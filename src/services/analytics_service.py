@@ -3,14 +3,14 @@ import pandas as pd
 from typing import Dict, List, Tuple, Optional
 try:
     from src.services.data_processor import DataProcessor
-    from src.constants import Columns, Database
+    from src.constants import Columns
     from src.models import db
 except ImportError:
     # Fallback para imports relativos
     from .data_processor import DataProcessor
     import sys
     sys.path.append('..')
-    from constants import Columns, Database
+    from constants import Columns
     from models import db
 
 

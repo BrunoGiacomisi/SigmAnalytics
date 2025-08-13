@@ -112,36 +112,43 @@ table.tabla tr {
 }
 
 .kpi-container {
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
+  display: block;           /* no flex */
+  white-space: nowrap;      /* todo en una línea */
+  font-size: 0;             /* elimina el hueco entre inline-blocks */
+  padding: 10px 14px;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  background: #fafbfc;
 }
 
 .kpi-card {
-  flex: 1;
-  background: #fafbfc;
+  display: inline-block;    /* cada "píldora" en línea */
+  vertical-align: middle;
+  font-size: 13px;          /* restaura tamaño (lo pusimos en 0 arriba) */
+  margin-right: 10px;       /* ← espacio entre píldoras */
+  padding: 8px 12px;
   border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  padding: 8px 6px;
-  text-align: center;
-  min-height: 45px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  border-radius: 999px;
+  background: #fff;
+  white-space: nowrap;      /* no cortar valores ($ 40, etc.) */
+  min-width: unset;         /* por si quedó algo heredado */
 }
+.kpi-card:last-child { margin-right: 0; }
 
+/* Título y valor en línea dentro de la píldora */
 .kpi-title {
-  font-size: 9px;
-  font-weight: 500;
+  display: inline-block;
+  margin: 0 6px 0 0;
+  font-size: 10px;
+  font-weight: 600;
   color: #6c757d;
-  margin-bottom: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: .2px;
 }
-
 .kpi-value {
+  display: inline-block;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   color: #00587A;
-  line-height: 1.1;
+  line-height: 1;
 }

@@ -17,7 +17,7 @@ from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR, is_wkhtmlt
 from src.views.tabla_dinamica_viewer import abrir_tabla_dinamica_viewer
 from src.models.design_system import (
     get_color, get_spacing, get_font_tuple, get_dimension,
-    BUTTON_PRIMARY, BUTTON_SECONDARY, CARD_CONFIG
+    BUTTON_PRIMARY, BUTTON_SECONDARY
 )
 from src.models.design_manager import design_manager
 
