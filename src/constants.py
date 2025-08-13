@@ -10,19 +10,35 @@ class Columns:
 # Configuración de procesamiento
 class Processing:
     DEFAULT_PRICE_PER_TRIP = 40.0
+    LASTRES_PRICE_PER_TRIP = 5.0
     DEFAULT_COLUMNS_ORDER = [
         "Fecha ingreso",
         "Nombre Ag.Transportista", 
         "Ag.transportista",
         "Precio"
     ]
+    LASTRES_COLUMNS_ORDER = [
+        "MIC/DNA",
+        "Mic original", 
+        "Fecha ingreso",
+        "Fecha Ofic.",
+        "Matricula",
+        "Remolque/SemiRem",
+        "Adu.Sal",
+        "Precio"
+    ]
+
+# Tipos de archivo
+class FileTypes:
+    INGRESOS = "ingresos"
+    LASTRES = "lastres"
 
 # Configuración de gráficos
 class Charts:
     DPI = 150
     FIGSIZE_DEFAULT = (12, 8)
     FIGSIZE_BOXPLOT = (10, 6)
-    TOP_TRANSPORTISTAS = 10
+    TOP_TRANSPORTISTAS = 10 # Por alguna razon si pongo 15 no me muestra los 15, solo los 10 primeros
     
 # Configuración de UI
 class UI:
@@ -45,6 +61,7 @@ class Messages:
     ARCHIVO_VALIDO = "✅ Archivo válido"
     ARCHIVO_INVALIDO_ICONO = "❌ Archivo inválido"
     ERROR_LECTURA = "❌ Error al leer archivo"
+    LASTRES_CARGADOS = "✅ Datos de lastres cargados. Podés verlos en 'Viajes por Representado'"
 
 # Colores de la aplicación
 class Colors:

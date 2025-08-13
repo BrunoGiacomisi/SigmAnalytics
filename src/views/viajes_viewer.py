@@ -12,6 +12,7 @@ from src.models.viajes_representado import (
     calcular_estadisticas_viajes,
     listar_representados_con_viajes,
 )
+from src.constants import FileTypes, Processing
 from src.config import LOGO_PATH
 from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR, is_wkhtmltopdf_available
 from src.views.tabla_dinamica_viewer import abrir_tabla_dinamica_viewer
@@ -30,9 +31,9 @@ except Exception:  # fallback si no está disponible
 class ViajesViewer(ctk.CTkToplevel):
     # Ventana para visualizar y exportar viajes por representado
 
-    def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str):
+    def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS):
         super().__init__(master)
-        self.title("Viajes por Representado")
+        self.title(f"Viajes por Representado - {file_type.title()}")
         self.geometry("1200x800")  # Tamaño más grande para mejor experiencia
         self.resizable(True, True)
 
@@ -40,6 +41,7 @@ class ViajesViewer(ctk.CTkToplevel):
         # Mapear solo los que viajaron: [(codigo, nombre), ...]
         self.items_cod_nombre = listar_representados_con_viajes(df_original, codigos_representados, periodo)
         self.periodo = periodo
+        self.file_type = file_type
 
         # Obtener colores del sistema de diseño
         self.colors = design_manager.get_colors()
@@ -381,7 +383,16 @@ class ViajesViewer(ctk.CTkToplevel):
         nombre_sel = self.display_var.get()
         codigo = self.codigo_por_nombre.get(nombre_sel, "")
         df_viajes = obtener_viajes_representado(self.df_original, codigo, self.periodo)
-        df_viajes = filtrar_columnas_relevantes(df_viajes, columnas=DEFAULT_COLUMNS_ORDER)
+        
+        # Usar columnas y precio según el tipo de archivo
+        if self.file_type == FileTypes.LASTRES:
+            columnas = Processing.LASTRES_COLUMNS_ORDER
+            precio = Processing.LASTRES_PRICE_PER_TRIP
+        else:
+            columnas = DEFAULT_COLUMNS_ORDER  
+            precio = Processing.DEFAULT_PRICE_PER_TRIP
+            
+        df_viajes = filtrar_columnas_relevantes(df_viajes, columnas=columnas, precio_por_viaje=precio)
         df_viajes_fmt = formatear_datos_para_visualizacion(df_viajes)
         return df_viajes_fmt
 
@@ -394,17 +405,26 @@ class ViajesViewer(ctk.CTkToplevel):
             nombre_sel = self.display_var.get()
             codigo = self.codigo_por_nombre.get(nombre_sel, "")
             df = obtener_viajes_representado(self.df_original, codigo, self.periodo)
-            df = filtrar_columnas_relevantes(df, columnas=DEFAULT_COLUMNS_ORDER)
-            stats = calcular_estadisticas_viajes(df)
+            
+            # Usar columnas y precio según el tipo de archivo
+            if self.file_type == FileTypes.LASTRES:
+                columnas = Processing.LASTRES_COLUMNS_ORDER
+                precio = Processing.LASTRES_PRICE_PER_TRIP
+            else:
+                columnas = DEFAULT_COLUMNS_ORDER  
+                precio = Processing.DEFAULT_PRICE_PER_TRIP
+                
+            df = filtrar_columnas_relevantes(df, columnas=columnas, precio_por_viaje=precio)
+            stats = calcular_estadisticas_viajes(df, precio_por_viaje=precio)
             ruta_pdf = generar_pdf_para_representado(
                 self.df_original,
                 codigo=codigo,
                 periodo=self.periodo,
                 nombre_representado=nombre_sel or None,
                 precio_por_viaje=stats["precio_por_viaje"],
-                columnas=DEFAULT_COLUMNS_ORDER,
+                columnas=columnas,
                 logo_path=str(LOGO_PATH),
-
+                file_type=self.file_type
             )
             messagebox.showinfo("Exportación", "PDF generado en la carpeta descargas")
         except Exception as e:
@@ -423,17 +443,26 @@ class ViajesViewer(ctk.CTkToplevel):
                 df = obtener_viajes_representado(self.df_original, codigo, self.periodo)
                 if df.empty:
                     continue
-                df = filtrar_columnas_relevantes(df, columnas=DEFAULT_COLUMNS_ORDER)
-                stats = calcular_estadisticas_viajes(df)
+                
+                # Usar columnas y precio según el tipo de archivo
+                if self.file_type == FileTypes.LASTRES:
+                    columnas = Processing.LASTRES_COLUMNS_ORDER
+                    precio = Processing.LASTRES_PRICE_PER_TRIP
+                else:
+                    columnas = DEFAULT_COLUMNS_ORDER  
+                    precio = Processing.DEFAULT_PRICE_PER_TRIP
+                    
+                df = filtrar_columnas_relevantes(df, columnas=columnas, precio_por_viaje=precio)
+                stats = calcular_estadisticas_viajes(df, precio_por_viaje=precio)
                 ruta_pdf = generar_pdf_para_representado(
                     self.df_original,
                     codigo=codigo,
                     periodo=self.periodo,
                     nombre_representado=nombre,
                     precio_por_viaje=stats["precio_por_viaje"],
-                    columnas=DEFAULT_COLUMNS_ORDER,
+                    columnas=columnas,
                     logo_path=str(LOGO_PATH),
-    
+                    file_type=self.file_type
                 )
                 generados.append(str(ruta_pdf))
             if generados:
@@ -447,12 +476,12 @@ class ViajesViewer(ctk.CTkToplevel):
         try:
             # Obtener los códigos de representados desde los items
             codigos_representados = [codigo for codigo, _ in self.items_cod_nombre]
-            abrir_tabla_dinamica_viewer(self, self.df_original, codigos_representados, self.periodo)
+            abrir_tabla_dinamica_viewer(self, self.df_original, codigos_representados, self.periodo, self.file_type)
         except Exception as e:
             messagebox.showerror("Error", f"Error al abrir tabla dinámica: {str(e)}")
 
 
-def abrir_viajes_viewer(master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str) -> None:
-    ViajesViewer(master, df_original=df_original, codigos_representados=codigos_representados, periodo=periodo)
+def abrir_viajes_viewer(master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS) -> None:
+    ViajesViewer(master, df_original=df_original, codigos_representados=codigos_representados, periodo=periodo, file_type=file_type)
 
 

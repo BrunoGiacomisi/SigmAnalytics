@@ -11,6 +11,7 @@ from src.models.viajes_representado import (
     calcular_totales_tabla_dinamica,
     ordenar_tabla_dinamica,
 )
+from src.constants import FileTypes, Processing
 from src.config import LOGO_PATH
 from src.models.design_manager import design_manager
 from src.models.design_system import get_color, get_spacing, get_font_tuple
@@ -19,22 +20,24 @@ from src.models.design_system import get_color, get_spacing, get_font_tuple
 class TablaDinamicaViewer(ctk.CTkToplevel):
     # Ventana para visualizar la tabla dinámica de resumen de transportes
 
-    def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str):
+    def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS):
         super().__init__(master)
-        self.title("Tabla Dinámica - Resumen de Transportes")
+        self.title(f"Tabla Dinámica - Resumen de Transportes ({file_type.title()})")
         self.geometry("1430x890")
         self.resizable(True, True)
 
         self.df_original = df_original
         self.codigos_representados = codigos_representados
         self.periodo = periodo
+        self.file_type = file_type
         self.orden_actual = "alfabetico"
         
         # Obtener colores del sistema de diseño
         self.colors = design_manager.get_colors()
 
-        # Generar datos de la tabla dinámica
-        self.df_resumen = generar_tabla_dinamica_resumen(df_original, periodo, codigos_representados)
+        # Generar datos de la tabla dinámica con precio según tipo
+        precio_por_viaje = Processing.LASTRES_PRICE_PER_TRIP if file_type == FileTypes.LASTRES else Processing.DEFAULT_PRICE_PER_TRIP
+        self.df_resumen = generar_tabla_dinamica_resumen(df_original, periodo, codigos_representados, precio_por_viaje=precio_por_viaje)
         self.df_resumen = ordenar_tabla_dinamica(self.df_resumen, self.orden_actual)
         self.totales = calcular_totales_tabla_dinamica(self.df_resumen)
 
@@ -59,12 +62,15 @@ class TablaDinamicaViewer(ctk.CTkToplevel):
         header_frame = ctk.CTkFrame(main_frame)
         header_frame.pack(fill="x", pady=(0, 10))
 
-        # Título
+        # Título con colores según tipo
+        titulo_texto = "LASTRES" if self.file_type == FileTypes.LASTRES else "INGRESOS"
+        color_titulo = "#27ae60" if self.file_type == FileTypes.LASTRES else "#3498db"
+        
         title_label = ctk.CTkLabel(
             header_frame, 
-            text="INGRESOS", 
+            text=titulo_texto, 
             font=("Segoe UI", 18, "bold"),
-            text_color="#3498db"
+            text_color=color_titulo
         )
         title_label.pack(pady=10)
 
@@ -107,11 +113,12 @@ class TablaDinamicaViewer(ctk.CTkToplevel):
         self.btn_orden_cantidad.pack(side="left", padx=5)
 
         # Título del gráfico (más claro y en la misma navegación)
+        titulo_grafico = f"Distribución de {titulo_texto.title()} por Transportista"
         chart_title_label = ctk.CTkLabel(
             controles_frame,
-            text="Distribución de Ingresos por Transportista",
+            text=titulo_grafico,
             font=("Segoe UI", 12, "bold"),
-            text_color="#3498db"
+            text_color=color_titulo
         )
         chart_title_label.pack(side="right", padx=(20, 191))
 
@@ -223,8 +230,9 @@ class TablaDinamicaViewer(ctk.CTkToplevel):
 
         # Generar datos para el gráfico SIEMPRE ordenados por "Cantidad de Viajes"
         # Esto asegura que el gráfico no cambie con el filtro de la tabla
+        precio_por_viaje = Processing.LASTRES_PRICE_PER_TRIP if self.file_type == FileTypes.LASTRES else Processing.DEFAULT_PRICE_PER_TRIP
         df_chart_base = generar_tabla_dinamica_resumen(
-            self.df_original, self.periodo, self.codigos_representados
+            self.df_original, self.periodo, self.codigos_representados, precio_por_viaje=precio_por_viaje
         )
         df_chart_sorted = ordenar_tabla_dinamica(df_chart_base, "cantidad_viajes")
 
@@ -346,5 +354,5 @@ class TablaDinamicaViewer(ctk.CTkToplevel):
         )
 
 
-def abrir_tabla_dinamica_viewer(master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str) -> None:
-    TablaDinamicaViewer(master, df_original=df_original, codigos_representados=codigos_representados, periodo=periodo)
+def abrir_tabla_dinamica_viewer(master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS) -> None:
+    TablaDinamicaViewer(master, df_original=df_original, codigos_representados=codigos_representados, periodo=periodo, file_type=file_type)
