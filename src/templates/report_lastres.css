@@ -1,0 +1,154 @@
+@page {
+  size: A4;
+  margin: 16mm 14mm 14mm 14mm; /* reducido ~1mm (~3pt) */
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #222;
+  font-size: 13px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border: 1px solid #a4d5a0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.titulo {
+  margin: 0 0 6px 0;
+  font-size: 22px; /* +2 puntos aprox */
+  color: #228b22;
+}
+.periodo {
+  margin: 2px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.logo {
+  margin-left: 20px; /* espacio respecto de los parámetros */
+}
+.logo img {
+  height: 60px;
+}
+
+.tabla-wrapper {
+  border: 1px solid #a4d5a0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.tabla-wrapper h2 {
+  margin: 0 0 8px 0;
+  font-size: 16px; /* un poco más grande */
+}
+.tabla-wrapper h2 .lastres { font-weight: 700; color: #228b22; }
+
+table.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  page-break-inside: auto;
+}
+table.tabla thead { display: table-header-group; }
+table.tabla tfoot { display: table-footer-group; }
+table.tabla th,
+table.tabla td {
+  border: 1px solid #90c695;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: middle; /* evita desalineo vertical */
+}
+
+/* Cabecera sticky y mejorada */
+table.tabla th {
+  background: #27ae60;
+  color: white;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Zebra striping - filas alternadas */
+table.tabla tbody tr:nth-child(even) {
+  background-color: #f1f8e9;
+}
+
+table.tabla tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+/* Alineación de valores numéricos a la derecha */
+table.tabla td:nth-last-child(-n+3) {
+  text-align: right;
+}
+
+/* Hover effect para mejor UX */
+table.tabla tbody tr:hover {
+  background-color: #c8e6c9 !important;
+}
+
+table.tabla tr { 
+  page-break-inside: avoid;
+  transition: background-color 0.2s ease;
+}
+
+.total-label { text-align: right; font-weight: 600; }
+.total {
+  font-weight: 700;
+  text-align: right;       /* alinear a la derecha el importe */
+  white-space: nowrap;     /* evita salto entre '$' y el número */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+/* BARRA DE KPIs - DISEÑO COMPACTO Y MINIMALISTA */
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+.kpi-section {
+  margin-bottom: 10px;
+}
+
+.kpi-container {
+  display: block;           /* no flex */
+  white-space: nowrap;      /* todo en una línea */
+  font-size: 0;             /* elimina el hueco entre inline-blocks */
+  padding: 10px 14px;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  background: #f1f8e9;
+}
+
+.kpi-card {
+  display: inline-block;    /* cada "píldora" en línea */
+  vertical-align: middle;
+  font-size: 13px;          /* restaura tamaño (lo pusimos en 0 arriba) */
+  margin-right: 10px;       /* ← espacio entre píldoras */
+  padding: 8px 12px;
+  border: 1px solid #c8e6c9;
+  border-radius: 999px;
+  background: #fff;
+  white-space: nowrap;      /* no cortar valores ($ 40, etc.) */
+  min-width: unset;         /* por si quedó algo heredado */
+}
+.kpi-card:last-child { margin-right: 0; }
+
+/* Título y valor en línea dentro de la píldora */
+.kpi-title {
+  display: inline-block;
+  margin: 0 6px 0 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+}
+.kpi-value {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 800;
+  color: #228b22;
+  line-height: 1;
+}

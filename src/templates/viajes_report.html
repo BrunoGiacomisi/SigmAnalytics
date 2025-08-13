@@ -38,7 +38,8 @@
     </section>
 
     <section class="tabla-wrapper">
-        <h2>Tabla de viajes de <span class="ingresos">ingresos</span></h2>
+        <h2>Tabla de viajes de <span class="{% if file_type == 'lastres' %}lastres{% else %}ingresos{% endif %}">{% if
+                file_type == 'lastres' %}lastres{% else %}ingresos{% endif %}</span></h2>
         <table class="tabla">
             <thead>
                 <tr>

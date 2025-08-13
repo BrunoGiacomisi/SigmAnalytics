@@ -172,6 +172,7 @@ def exportar_pdf_viajes(
     metadata: Dict[str, str],
     output_pdf_path: Path,
     logo_path: Optional[str] = None,
+    file_type: str = "ingresos",
 ) -> Path:
     # Genera PDF a partir de HTML+CSS para obtener un layout prolijo y paginado.
     output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
@@ -195,14 +196,16 @@ def exportar_pdf_viajes(
         "columnas": columnas,
         "filas": filas,
         "logo_url": str(LOGO_PATH) if (logo_path or LOGO_PATH) else None,
+        "file_type": file_type,
     }
 
     # Generar HTML del reporte con diseño claro estándar
     from src.models.pdf_renderer import build_report_html
     html = build_report_html(context)
     
-    # Usar CSS claro estándar para PDFs
-    css_path = Path(__file__).parent.parent / "templates" / "report.css"
+    # Usar CSS específico según el tipo de archivo
+    css_filename = "report_lastres.css" if file_type == "lastres" else "report.css"
+    css_path = Path(__file__).parent.parent / "templates" / css_filename
     return export_pdf_from_html(html, css_path, output_pdf_path)
 
 
@@ -215,7 +218,7 @@ def generar_pdf_para_representado(
     columnas: Optional[List[str]] = None,
     logo_path: Optional[str] = None,
     downloads_dir: Optional[Path] = None,
-
+    file_type: str = "ingresos",
 ) -> Path:
     # Genera el PDF para un representado específico y retorna la ruta.
     df_viajes = obtener_viajes_representado(df_original, codigo, periodo)
@@ -242,7 +245,9 @@ def generar_pdf_para_representado(
         anio, mes = periodo[:4], periodo[5:7] if len(periodo) >= 7 else ('', '')
     periodo_comp = f"{anio}_{mes}"
 
-    file_name = f"Ingresos_{nombre_comp}_{periodo_comp}.pdf"
+    # Usar prefijo según tipo de archivo
+    prefix = "Lastres" if file_type == "lastres" else "Ingresos"
+    file_name = f"{prefix}_{nombre_comp}_{periodo_comp}.pdf"
     output_pdf_path = downloads / file_name
 
     metadata = {
@@ -254,7 +259,7 @@ def generar_pdf_para_representado(
         "monto_total": str(stats["total"]),
     }
 
-    return exportar_pdf_viajes(df_viajes_fmt, metadata, output_pdf_path, logo_path=logo_path)
+    return exportar_pdf_viajes(df_viajes_fmt, metadata, output_pdf_path, logo_path=logo_path, file_type=file_type)
 
 
 def generar_tabla_dinamica_resumen(

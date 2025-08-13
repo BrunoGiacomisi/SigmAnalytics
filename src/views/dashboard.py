@@ -8,7 +8,7 @@ from src.config import (
     TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS
 )
 from src.constants import (
-    Messages, Colors, UI
+    Messages, Colors, UI, FileTypes
 )
 from src.representados import CODIGOS_REPRESENTADOS 
 from src.models.config_manager import config_manager
@@ -96,7 +96,8 @@ def crear_dashboard():
         design_manager.apply_widget_design(main_container, "main_container")
         
         # Botones
-        design_manager.apply_widget_design(boton, "button_primary")
+        design_manager.apply_widget_design(boton_ingresos, "button_primary")
+        design_manager.apply_widget_design(boton_lastres, "button_primary")
         design_manager.apply_widget_design(boton_info_datos, "button_secondary")
         design_manager.apply_widget_design(boton_viajes, "button_secondary")
         
@@ -287,6 +288,7 @@ def crear_dashboard():
     # Estado del último archivo cargado para abrir el visualizador
     df_cargado: Optional[pd.DataFrame] = None
     periodo_cargado: Optional[str] = None
+    tipo_archivo_actual: str = FileTypes.INGRESOS  # Tipo de archivo actual
 
     # ═══════════════════════════════════════════════════════════════════════════════
     # SECCIÓN DE FEEDBACK Y STATUS (EN EL HEADER)
@@ -487,21 +489,26 @@ def crear_dashboard():
         else:
             messagebox.showerror("Error", "No se encontró la imagen para ampliar.")
 
-    # Función que se ejecuta cuando el usuario presiona el botón
-    def ejecutar_procesamiento() -> None:
+    # Función que se ejecuta cuando el usuario presiona un botón de procesamiento
+    def ejecutar_procesamiento(file_type: str) -> None:
+        nonlocal tipo_archivo_actual
         try:
-            boton.configure(state='disabled')
+            boton_ingresos.configure(state='disabled')
+            boton_lastres.configure(state='disabled')
             spinner.configure(text="⏳ Procesando...")
             
             # Usar FileService
             file_service = FileService()
-            ruta_archivo = file_service.select_manifest_file()
+            ruta_archivo = file_service.select_manifest_file(file_type)
             if not ruta_archivo:
                 feedback_icon.set("")
                 spinner.configure(text="")
-                boton.configure(state='normal')
+                boton_ingresos.configure(state='normal')
+                boton_lastres.configure(state='normal')
                 return
-            archivo_seleccionado.set(f"Archivo: {os.path.basename(ruta_archivo)}")
+            
+            tipo_archivo_actual = file_type
+            archivo_seleccionado.set(f"Archivo ({file_type}): {os.path.basename(ruta_archivo)}")
 
             def run_proceso():
                 try:
@@ -513,13 +520,14 @@ def crear_dashboard():
                             feedback_icon.set(Messages.ARCHIVO_INVALIDO_ICONO)
                             label_feedback.configure(text_color=Colors.ERROR)
                             spinner.configure(text="")
-                            boton.configure(state='normal')
+                            boton_ingresos.configure(state='normal')
+                            boton_lastres.configure(state='normal')
                             messagebox.showerror("Error al procesar", Messages.ARCHIVO_INVALIDO)
                         ventana.after(0, on_invalid)
                         return
 
-                    # 2) Procesamiento pesado
-                    resultado = file_service.process_manifest_file(ruta_archivo, CODIGOS_REPRESENTADOS, df=df_local)
+                    # 2) Procesamiento según tipo de archivo
+                    resultado = file_service.process_manifest_file(ruta_archivo, CODIGOS_REPRESENTADOS, file_type=file_type, df=df_local)
                     mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, actualizado, viajes_representados, ruta_boxplot_periodo, ruta_barplot_periodo, es_preview = resultado
 
                     # 3) Calcular periodo para el viewer
@@ -529,15 +537,26 @@ def crear_dashboard():
                         nonlocal df_cargado, periodo_cargado
                         df_cargado = df_local
                         periodo_cargado = periodo_local
-                        feedback_icon.set(Messages.PROCESAMIENTO_EXITOSO if not es_preview else "ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
-                        label_feedback.configure(text_color=(Colors.SUCCESS if not es_preview else "#e67e22"))
-                        actualizar_panel_resultados(mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, viajes_representados, actualizado)
-                        mostrar_imagen(ruta_boxplot_periodo, etiqueta_imagen_boxplot)
-                        mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
-                        mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
-                        set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
+                        
+                        if file_type == FileTypes.LASTRES:
+                            # Para lastres, mostrar mensaje especial y ocultar KPIs/gráficos
+                            feedback_icon.set(Messages.LASTRES_CARGADOS)
+                            label_feedback.configure(text_color="#43a047")
+                            ocultar_kpis_y_graficos()
+                        else:
+                            # Para ingresos, procesamiento normal
+                            feedback_icon.set(Messages.PROCESAMIENTO_EXITOSO if not es_preview else "ℹ Solo vista previa: el periodo es igual o anterior al último registrado. No se guardó en la base de datos ni en la carpeta de gráficos.")
+                            label_feedback.configure(text_color=(Colors.SUCCESS if not es_preview else "#e67e22"))
+                            actualizar_panel_resultados(mediana_rep, mediana_otros, promedio_rep, promedio_otros, participacion, viajes_representados, actualizado)
+                            mostrar_imagen(ruta_boxplot_periodo, etiqueta_imagen_boxplot)
+                            mostrar_imagen(ruta_barplot_periodo, etiqueta_imagen_barras)
+                            mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
+                            set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
+                            mostrar_kpis_y_graficos()
+                        
                         spinner.configure(text="")
-                        boton.configure(state='normal')
+                        boton_ingresos.configure(state='normal')
+                        boton_lastres.configure(state='normal')
                         if df_cargado is not None and periodo_cargado:
                             boton_viajes.configure(state='normal')
                     ventana.after(0, on_success)
@@ -547,7 +566,8 @@ def crear_dashboard():
                         feedback_icon.set(Messages.PROCESAMIENTO_ERROR)
                         label_feedback.configure(text_color=Colors.ERROR)
                         spinner.configure(text="")
-                        boton.configure(state='normal')
+                        boton_ingresos.configure(state='normal')
+                        boton_lastres.configure(state='normal')
                         messagebox.showerror("Error al procesar", str(e))
                     ventana.after(0, on_error)
 
@@ -555,22 +575,63 @@ def crear_dashboard():
 
         except Exception as e:
             spinner.configure(text="")
-            boton.configure(state='normal')
+            boton_ingresos.configure(state='normal')
+            boton_lastres.configure(state='normal')
             messagebox.showerror("Error inesperado", str(e))
 
-    # Agregar el botón principal al header ahora que ejecutar_procesamiento está definido
-    boton = ctk.CTkButton(
-        master=center_section,
-        text="Seleccionar archivo y procesar manifiesto",
-        command=ejecutar_procesamiento,
+    def ocultar_kpis_y_graficos():
+        """Oculta los KPIs y gráficos para el modo lastres"""
+        # Ocultar sección de KPIs
+        kpi_section_title.pack_forget()
+        kpi_container.pack_forget()
+        label_historial.pack_forget()
+        
+        # Ocultar sección de gráficos
+        charts_section_title.pack_forget()
+        frame_graficos.pack_forget()
+
+    def mostrar_kpis_y_graficos():
+        """Muestra los KPIs y gráficos para el modo ingresos"""
+        # Mostrar sección de KPIs
+        kpi_section_title.pack(fill="x", pady=(0, get_spacing("md")))
+        kpi_container.pack(fill="x", pady=(0, get_spacing("xl")))
+        label_historial.pack(fill="x", pady=(get_spacing("sm"), get_spacing("lg")))
+        
+        # Mostrar sección de gráficos
+        charts_section_title.pack(fill="x", pady=(0, get_spacing("md")))
+        frame_graficos.pack(fill="x", pady=(0, get_spacing("xl")))
+
+    # Crear frame para los dos botones principales
+    buttons_frame = ctk.CTkFrame(master=center_section, fg_color="transparent")
+    buttons_frame.pack(anchor="center", pady=get_spacing("sm"))
+    
+    # Botón para Ingresos (azul)
+    boton_ingresos = ctk.CTkButton(
+        master=buttons_frame,
+        text="📈 Seleccionar archivo de ingresos",
+        command=lambda: ejecutar_procesamiento(FileTypes.INGRESOS),
         **BUTTON_PRIMARY,
-        fg_color=colors["primary"],
-        hover_color=colors["primary_hover"],
+        fg_color="#3498db",  # Azul para ingresos
+        hover_color="#2980b9",
         text_color=colors["text_on_primary"],
-        width=320  # Ancho fijo para el botón principal
+        width=250  # Ancho fijo
     )
-    boton.pack(anchor="center", pady=get_spacing("sm"))
-    theme_widgets['boton'] = boton
+    boton_ingresos.pack(side="left", padx=(0, get_spacing("sm")))
+    theme_widgets['boton_ingresos'] = boton_ingresos
+    
+    # Botón para Lastres (verde)
+    boton_lastres = ctk.CTkButton(
+        master=buttons_frame,
+        text="🚛 Seleccionar archivo de lastres",
+        command=lambda: ejecutar_procesamiento(FileTypes.LASTRES),
+        **BUTTON_PRIMARY,
+        fg_color="#27ae60",  # Verde para lastres
+        hover_color="#229954",
+        text_color=colors["text_on_primary"],
+        width=250  # Ancho fijo
+    )
+    boton_lastres.pack(side="left")
+    theme_widgets['boton_lastres'] = boton_lastres
 
     # Botón para abrir el visualizador de viajes por representado
     def abrir_visualizador() -> None:
@@ -578,7 +639,7 @@ def crear_dashboard():
             messagebox.showinfo("Información", "Primero cargá y procesá un manifiesto válido para poder visualizar.")
             return
         try:
-            abrir_viajes_viewer(ventana, df_cargado, CODIGOS_REPRESENTADOS, periodo_cargado)
+            abrir_viajes_viewer(ventana, df_cargado, CODIGOS_REPRESENTADOS, periodo_cargado, tipo_archivo_actual)
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
