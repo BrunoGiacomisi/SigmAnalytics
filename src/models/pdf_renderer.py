@@ -27,7 +27,7 @@ def build_report_html(context: Dict[str, Any]) -> str:
     return render_html("viajes_report.html", context_with_css)
 
 
-def is_wkhtmltopdf_available() -> bool:
+def is_wkhtmltopdf_available() -> bool: # El uso de esto es solamente para avisar al usuario si no esta disponible
     # Retorna True si se encuentra wkhtmltopdf accesible en el sistema.
     return _has_wkhtmltopdf() is not None
 

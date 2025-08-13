@@ -1,6 +1,5 @@
 import customtkinter as ctk  # Librería para una interfaz gráfica moderna basada en tkinter
-from tkinter import filedialog, messagebox  # Utilidades para abrir archivos y mostrar mensajes emergentes
-from src import main  # Se importa el módulo principal que procesa el archivo
+from tkinter import messagebox  # Utilidades para mostrar mensajes emergentes
 from src.views.viajes_viewer import abrir_viajes_viewer
 from src.models import db as db_model
 from typing import Optional
@@ -9,28 +8,20 @@ from src.config import (
     TITULO_BOXPLOT, TITULO_BARRAS, TITULO_PROMEDIOS
 )
 from src.constants import (
-    ChartTitles, Messages, Colors, UI
+    Messages, Colors, UI
 )
 from src.representados import CODIGOS_REPRESENTADOS 
 from src.models.config_manager import config_manager
 from src.models.design_manager import design_manager
 from src.models.design_system import (
-    get_color, get_spacing, get_font_tuple, get_dimension,
-    BUTTON_PRIMARY, BUTTON_SECONDARY, CARD_CONFIG, HEADER_CONFIG
+    get_spacing, get_font_tuple, get_dimension,
+    BUTTON_PRIMARY, BUTTON_SECONDARY
 )
 from PIL import Image, ImageTk  # Para trabajar con imágenes en tkinter
 import os
 import pandas as pd
-import sys
 import threading
 from src.services import FileService
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 # Función principal que crea y lanza la interfaz gráfica
 def crear_dashboard():
@@ -259,22 +250,6 @@ def crear_dashboard():
     )
     boton_info_datos.pack(side="left", padx=(0, get_spacing("sm")))
     theme_widgets['boton_info_datos'] = boton_info_datos
-    
-    # Botón para cambiar tema (con indicador de estado)
-    # Fijamos modo oscuro y ocultamos el toggle para simplificar
-    # tema_siguiente = "Claro" if is_dark_mode else "Oscuro"
-    # boton_tema = ctk.CTkButton(
-    #     master=right_section,
-    #     text=f"🌙 Modo {tema_siguiente}",
-    #     command=cambiar_tema,
-    #     width=120,
-    #     **BUTTON_SECONDARY,
-    #     fg_color=colors["secondary"],
-    #     hover_color=colors["secondary_hover"],
-    #     text_color=colors["text_on_primary"]
-    # )
-    # boton_tema.pack(side="left")
-    # theme_widgets['boton_tema'] = boton_tema
 
     # ═══════════════════════════════════════════════════════════════════════════════
     # CONTENIDO PRINCIPAL SCROLLABLE

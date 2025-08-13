@@ -3,13 +3,8 @@ from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
 import pandas as pd
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
-from .pdf_renderer import render_html, export_pdf_from_html
+from .pdf_renderer import export_pdf_from_html
 from src.config import LOGO_PATH
-from src.services.data_processor import DataProcessor
-# MetricsCalculator eliminado - funcionalidad ya existe en DataProcessor
-from src.constants import Columns, Processing
 
 
 DEFAULT_COLUMNS_ORDER: List[str] = [

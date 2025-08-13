@@ -22,7 +22,7 @@ class Charts:
     DPI = 150
     FIGSIZE_DEFAULT = (12, 8)
     FIGSIZE_BOXPLOT = (10, 6)
-    TOP_TRANSPORTISTAS = 15
+    TOP_TRANSPORTISTAS = 10
     
 # Configuración de UI
 class UI:
@@ -58,8 +58,3 @@ class ChartTitles:
     BARRAS = "Barras: Top Representados + Medianas"
     PROMEDIOS = "Serie Temporal: Promedios"
     TEMPORAL = "Evolución Temporal de Medianas"
-
-# Configuración de base de datos
-class Database:
-    TABLE_NAME = "historico_metricas"
-    DATE_FORMAT = "%Y-%m"

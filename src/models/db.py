@@ -5,11 +5,6 @@ import sys
 import os
 from src.config import HISTORICO_DIR
 
-def persistent_path(relative_path):
-    # Deprecated: mantenido por compatibilidad si algún código externo lo usa.
-    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
-    return os.path.abspath(os.path.join(base_path, os.path.basename(relative_path)))
-
 # Ruta donde se guardará (o ya existe) la base de datos SQLite (en AppData del usuario)
 DB_PATH = os.path.join(str(HISTORICO_DIR), 'historico.db')
 os.makedirs(str(HISTORICO_DIR), exist_ok=True)
