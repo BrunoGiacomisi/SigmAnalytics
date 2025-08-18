@@ -82,19 +82,6 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
 - **Barras**: Top representados y medianas
 - **Serie temporal**: Promedios a lo largo del tiempo
 
-## 📝 Licencia
-
-Este proyecto es propiedad de SIGMA CARGO. Todos los derechos reservados.
-
-## 📞 Soporte
-
-Para soporte técnico o consultas:
-
-- Contactar al equipo de desarrollo
-- Revisar la documentación en este README
-- Verificar los logs en caso de errores
-
----
 
 **Versión**: 1.0.0  
 **Última actualización**: Julio 2025  
