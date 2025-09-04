@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from src.constants import Colors, ChartTitles
 
 def get_user_data_directory():
     # Obtiene la carpeta de datos del usuario de forma profesional.
@@ -57,19 +58,13 @@ ruta_grafico_promedios = str(RUTA_GRAFICO_PROMEDIOS)
 ruta_boxplot = str(RUTA_BOXPLOT)
 ruta_barplot = str(RUTA_BARPLOT)
 
-# Constantes de textos y UI para dashboard
-TITULO_BOXPLOT = "Boxplot: Distribución de Operaciones"
-TITULO_BARRAS = "Barras: Top Representados + Medianas"
-TITULO_PROMEDIOS = "Serie Temporal: Promedios"
-MENSAJE_ARCHIVO_INVALIDO = "El archivo no contiene las columnas necesarias: 'Ag.transportista' y 'Nombre Ag.Transportista'."
-MENSAJE_PROCESAMIENTO_EXITOSO = "✅ Procesamiento exitoso"
-MENSAJE_PROCESAMIENTO_ERROR = "❌ Error en el procesamiento"
-MENSAJE_ARCHIVO_VALIDO = "✅ Archivo válido"
-MENSAJE_ARCHIVO_INVALIDO_ICONO = "❌ Archivo inválido"
-MENSAJE_ERROR_LECTURA = "❌ Error al leer archivo"
-COLOR_EXITO = "#43a047"
-COLOR_ERROR = "#e53935"
-COLOR_TITULO = "#00587A"
+# Constantes de textos y UI para dashboard (centralizadas en constants)
+TITULO_BOXPLOT = ChartTitles.BOXPLOT
+TITULO_BARRAS = ChartTitles.BARRAS
+TITULO_PROMEDIOS = ChartTitles.PROMEDIOS
+COLOR_EXITO = Colors.SUCCESS
+COLOR_ERROR = Colors.ERROR
+COLOR_TITULO = Colors.TITLE
 TAMANO_IMAGEN = (600, 400)
 TAMANO_POPUP = (900, 600)
 TAMANO_POPUP_IMG = (850, 550)
@@ -83,20 +78,6 @@ DEFAULT_CONFIG = {
     "window_position": None,
     "logo_size": [160, 160],
     "data_directory": str(USER_DATA_DIR)
-}
-
-# Colores heredados para compatibilidad (usar design_system.py para nuevos componentes)
-LEGACY_COLORS = {
-    "bg_color": "#2d2d2d",
-    "frame_color": "#404040", 
-    "text_color": "#e0e0e0",
-    "title_color": "#ffffff",
-    "accent_color": "#4a9eff",
-    "hover_color": "#66b3ff",
-    "success_color": "#4caf50",
-    "error_color": "#f44336",
-    "stats_bg": "#4a4a4a",
-    "stats_border": "#666666"
 }
 
 def show_data_directory_info():
