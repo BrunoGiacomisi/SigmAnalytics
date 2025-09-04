@@ -271,7 +271,13 @@ class ViajesViewer(ctk.CTkToplevel):
         else:
             # Calcular estadísticas
             total_viajes = len(df)
-            stats = calcular_estadisticas_viajes(df)
+            # Usar precio correcto según el tipo de archivo
+            precio = (
+                Processing.LASTRES_PRICE_PER_TRIP
+                if self.file_type == FileTypes.LASTRES
+                else Processing.DEFAULT_PRICE_PER_TRIP
+            )
+            stats = calcular_estadisticas_viajes(df, precio_por_viaje=precio)
             # Keys válidas según calcular_estadisticas_viajes
             monto_total = stats.get("total", 0)
             
@@ -296,7 +302,12 @@ class ViajesViewer(ctk.CTkToplevel):
         else:
             # Calcular estadísticas
             total_viajes = len(df)
-            stats = calcular_estadisticas_viajes(df)
+            precio = (
+                Processing.LASTRES_PRICE_PER_TRIP
+                if self.file_type == FileTypes.LASTRES
+                else Processing.DEFAULT_PRICE_PER_TRIP
+            )
+            stats = calcular_estadisticas_viajes(df, precio_por_viaje=precio)
             monto_total = stats.get("total", 0)
             representado_actual = self.display_var.get() or "-"
             codigo_actual = self.codigo_por_nombre.get(representado_actual, "-")

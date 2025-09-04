@@ -12,7 +12,7 @@ Pillow>=10.0.0
 openpyxl>=3.1.0
 
 # Database
-sqlite3  # Built-in with Python
+#sqlite3  # Built-in with Python, no es necesario instalar
 
 # Development and building
 pyinstaller>=6.0.0

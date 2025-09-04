@@ -140,7 +140,8 @@ def get_dimension(dimension_name: str) -> Any:
 # Configuración de botón primario
 BUTTON_PRIMARY = {
     "height": DIMENSIONS["button_height"],
-    "font": get_font_tuple("base", "bold"),
+    # Hacemos el texto más protagónico en botones primarios
+    "font": get_font_tuple("xl", "bold"),
     "corner_radius": DIMENSIONS["border_radius"],
 }
 

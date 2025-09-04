@@ -207,10 +207,14 @@ def crear_dashboard():
     # Contenedor interno para centrar contenido del header
     header_content = ctk.CTkFrame(master=header_frame, fg_color="transparent")
     header_content.pack(fill="both", expand=True, padx=get_spacing("lg"), pady=get_spacing("sm"))
+    # Usar grid en 3 columnas para alinear izquierda/centro/derecha
+    header_content.grid_columnconfigure(0, weight=1)
+    header_content.grid_columnconfigure(1, weight=1)
+    header_content.grid_columnconfigure(2, weight=1)
     
     # Logo y título (lado izquierdo)
     left_section = ctk.CTkFrame(master=header_content, fg_color="transparent")
-    left_section.pack(side="left", fill="y")
+    left_section.grid(row=0, column=0, sticky="w")
     
     # Logo de la empresa
     logo_label = cargar_logo_empresa(left_section)
@@ -226,9 +230,9 @@ def crear_dashboard():
     titulo.pack(side="left", pady=0)
     theme_widgets['titulo'] = titulo
 
-    # Sección central - Botón principal
+    # Sección central - Botón principal (centrado usando pack + expand)
     center_section = ctk.CTkFrame(master=header_content, fg_color="transparent")
-    center_section.pack(side="left", fill="both", expand=True, padx=get_spacing("xl"))
+    center_section.grid(row=0, column=1, sticky="n")
     
     # El botón principal se agregará después de definir ejecutar_procesamiento()
     # Por ahora creamos un placeholder
@@ -236,7 +240,7 @@ def crear_dashboard():
     
     # Sección derecha - Botones secundarios
     right_section = ctk.CTkFrame(master=header_content, fg_color="transparent")
-    right_section.pack(side="right", fill="y")
+    right_section.grid(row=0, column=2, sticky="e")
     
     # Botón de información de datos (secundario)
     boton_info_datos = ctk.CTkButton(
@@ -553,6 +557,16 @@ def crear_dashboard():
                             mostrar_imagen(RUTA_GRAFICO_PROMEDIOS, etiqueta_imagen_promedios)
                             set_rutas_graficos_periodo(ruta_boxplot_periodo, ruta_barplot_periodo)
                             mostrar_kpis_y_graficos()
+                            # Mostrar botones "Ampliar" ahora que hay datos de ingresos
+                            try:
+                                if btn_boxplot.winfo_manager() != 'pack':
+                                    btn_boxplot.pack(side="right")
+                                if btn_barras.winfo_manager() != 'pack':
+                                    btn_barras.pack(side="right")
+                                if btn_promedios.winfo_manager() != 'pack':
+                                    btn_promedios.pack(side="right")
+                            except Exception:
+                                pass
                         
                         spinner.configure(text="")
                         boton_ingresos.configure(state='normal')
@@ -608,13 +622,13 @@ def crear_dashboard():
     # Botón para Ingresos (azul)
     boton_ingresos = ctk.CTkButton(
         master=buttons_frame,
-        text="📈 Seleccionar archivo de ingresos",
+        text="Seleccionar archivo de INGRESOS",
         command=lambda: ejecutar_procesamiento(FileTypes.INGRESOS),
         **BUTTON_PRIMARY,
         fg_color="#3498db",  # Azul para ingresos
         hover_color="#2980b9",
         text_color=colors["text_on_primary"],
-        width=250  # Ancho fijo
+        width=320  # Ancho fijo y uniforme
     )
     boton_ingresos.pack(side="left", padx=(0, get_spacing("sm")))
     theme_widgets['boton_ingresos'] = boton_ingresos
@@ -622,13 +636,13 @@ def crear_dashboard():
     # Botón para Lastres (verde)
     boton_lastres = ctk.CTkButton(
         master=buttons_frame,
-        text="🚛 Seleccionar archivo de lastres",
+        text="Seleccionar archivo de LASTRES",
         command=lambda: ejecutar_procesamiento(FileTypes.LASTRES),
         **BUTTON_PRIMARY,
         fg_color="#27ae60",  # Verde para lastres
         hover_color="#229954",
         text_color=colors["text_on_primary"],
-        width=250  # Ancho fijo
+        width=320  # Ancho fijo y uniforme
     )
     boton_lastres.pack(side="left")
     theme_widgets['boton_lastres'] = boton_lastres
@@ -708,7 +722,7 @@ def crear_dashboard():
         )
         title_label.pack(side="left", fill="both", expand=True)
         
-        # Botón "Ampliar" en la esquina superior derecha
+        # Botón "Ampliar" en la esquina superior derecha (se mostrará luego de cargar ingresos)
         ampliar_btn = ctk.CTkButton(
             master=header,
             text="🔍 Ampliar",
@@ -719,7 +733,7 @@ def crear_dashboard():
             hover_color=colors["secondary_hover"],
             text_color=colors["text_on_primary"]
         )
-        ampliar_btn.pack(side="right")
+        # No lo empaquetamos aún para que no aparezca sin datos
         
         # Área del gráfico
         chart_area = ctk.CTkLabel(

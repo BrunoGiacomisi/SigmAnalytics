@@ -37,7 +37,7 @@ body {
 }
 
 .tabla-wrapper {
-  border: 1px solid #a4d5a0;
+  border: 1px solid #cfd8dc;
   border-radius: 10px;
   padding: 10px 12px;
 }
@@ -45,7 +45,7 @@ body {
   margin: 0 0 8px 0;
   font-size: 16px; /* un poco más grande */
 }
-.tabla-wrapper h2 .lastres { font-weight: 700; color: #228b22; }
+.tabla-wrapper h2 .lastres { font-weight: 700; color: #2e7d32; }
 
 table.tabla {
   width: 100%;
@@ -56,8 +56,9 @@ table.tabla thead { display: table-header-group; }
 table.tabla tfoot { display: table-footer-group; }
 table.tabla th,
 table.tabla td {
-  border: 1px solid #90c695;
-  padding: 8px 12px;
+  border: 1px solid #b0bec5;
+  padding: 6px 8px;            /* padding más compacto para evitar desborde */
+  font-size: 12px;             /* reduce el tamaño solo en la tabla */
   text-align: left;
   vertical-align: middle; /* evita desalineo vertical */
 }

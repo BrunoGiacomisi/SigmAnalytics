@@ -111,9 +111,12 @@ class AnalyticsService:
         # Determinar si es preview (período anterior al más reciente)
         print("DEBUG: Verificando si es preview...")
         most_recent_period = db.get_periodo_mas_reciente()
-        is_preview = (most_recent_period is not None and 
-                     period is not None and 
-                     period <= most_recent_period)
+        # Es preview solo si el período actual es ANTERIOR al más reciente
+        is_preview = (
+            most_recent_period is not None
+            and period is not None
+            and period < most_recent_period
+        )
         print(f"DEBUG: Es preview: {is_preview} (período actual: {period}, más reciente: {most_recent_period})")
         
         result = {

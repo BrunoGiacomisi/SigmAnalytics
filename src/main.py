@@ -87,3 +87,6 @@ if __name__ == "__main__":
     from src.views.dashboard import crear_dashboard
     crear_dashboard()
 
+# Para ejecutar el archivo: 
+# primero: venv\Scripts\activate
+# segundo: python main.py
