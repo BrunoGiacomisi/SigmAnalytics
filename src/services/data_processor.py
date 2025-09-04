@@ -8,6 +8,19 @@ from src.constants import Columns, Processing
 class DataProcessor:
     """Centraliza toda la lógica de filtrado y procesamiento de DataFrames"""
     
+    # Utilidades comunes
+    @staticmethod
+    def _prepare_df_with_clean_dates(df: pd.DataFrame, date_column: str) -> pd.DataFrame:
+        """
+        Retorna una copia del DataFrame con la columna de fecha convertida a datetime
+        y sin filas inválidas para esa columna. Esta función encapsula la lógica
+        repetida de conversión y limpieza para minimizar coste y errores.
+        """
+        df_copy = df.copy()
+        df_copy[date_column] = pd.to_datetime(df_copy[date_column], errors='coerce')
+        df_copy = df_copy.dropna(subset=[date_column])
+        return df_copy
+
     @staticmethod
     def normalize_code(code: str) -> str:
         """Normaliza un código eliminando caracteres no numéricos"""
@@ -51,9 +64,7 @@ class DataProcessor:
         Filtra un DataFrame por período (YYYY-MM).
         """
         try:
-            df_copy = df.copy()
-            df_copy[date_column] = pd.to_datetime(df_copy[date_column], errors='coerce')
-            df_copy = df_copy.dropna(subset=[date_column])
+            df_copy = cls._prepare_df_with_clean_dates(df, date_column)
             
             # Crear máscara de período
             period_mask = df_copy[date_column].dt.strftime('%Y-%m') == period
@@ -69,18 +80,16 @@ class DataProcessor:
         """
         Filtra por códigos Y período en una sola operación eficiente.
         """
-        # Normalizar códigos
+        # Preparar dataframe con fechas limpias
+        df_copy = cls._prepare_df_with_clean_dates(df, date_column)
+        
+        # Normalizar sobre el mismo df_copy para evitar desalineaciones
+        df_copy[code_column] = cls.normalize_code_series(df_copy[code_column])
         normalized_search_codes = cls.normalize_codes_list(codes)
-        normalized_df_codes = cls.normalize_code_series(df[code_column])
         
-        # Filtros
-        df_copy = df.copy()
-        df_copy[date_column] = pd.to_datetime(df_copy[date_column], errors='coerce')
-        df_copy = df_copy.dropna(subset=[date_column])
-        
-        # Máscaras combinadas
+        # Máscaras combinadas (mismo DF base)
         period_mask = df_copy[date_column].dt.strftime('%Y-%m') == period
-        code_mask = normalized_df_codes.isin(normalized_search_codes)
+        code_mask = df_copy[code_column].isin(normalized_search_codes)
         
         return df_copy[period_mask & code_mask].copy()
     
@@ -160,9 +169,7 @@ class DataProcessor:
         Extrae el período (YYYY-MM) más frecuente del DataFrame.
         """
         try:
-            df_copy = df.copy()
-            df_copy[date_column] = pd.to_datetime(df_copy[date_column], errors='coerce')
-            df_copy = df_copy.dropna(subset=[date_column])
+            df_copy = cls._prepare_df_with_clean_dates(df, date_column)
             
             if df_copy.empty:
                 return None
