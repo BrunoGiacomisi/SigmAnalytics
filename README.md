@@ -63,10 +63,6 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
   - `WKHTMLTOPDF_BINARY` o `WKHTMLTOPDF_PATH`
   - Ejemplo: `C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe`
 
-3. Verificación dentro de la app
-
-- En el visualizador de viajes, la app te avisará si wkhtmltopdf no está disponible y deshabilitará los botones de exportación.
-
 ## 📊 Funcionalidades de Análisis
 
 ### Métricas calculadas:
@@ -82,6 +78,25 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
 - **Barras**: Top representados y medianas
 - **Serie temporal**: Promedios a lo largo del tiempo
 
+### Stack utilizado:
+
+- Python 3 — lenguaje base y punto de entrada de la aplicación
+
+- Pandas + NumPy + OpenPyXL — leer planillas de Excel y procesar los datos en DataFrames
+
+- CustomTkinter — interfaz gráfica moderna sobre Tkinter (ventana principal, temas, widgets)
+
+- Pillow — carga y manejo de imágenes (logo, íconos) dentro de la GUI
+
+- Matplotlib + Seaborn — generación de boxplots, barras y series temporales para análisis visual
+
+- SQLite 3 — base de datos local para guardar métricas históricas de períodos
+
+- Jinja2 + pdfkit + wkhtmltopdf — renderizado de plantillas HTML y conversión a PDF para reportes por representado
+
+- TkinterWeb — previsualización embebida de HTML en la interfaz antes de exportar a PDF
+
+- PyInstaller — creación de ejecutables distribuibles de la aplicación completa
 
 **Versión**: 1.0.0  
 **Última actualización**: Julio 2025  
