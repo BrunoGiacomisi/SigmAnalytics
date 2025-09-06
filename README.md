@@ -1,13 +1,12 @@
 # SigmAnalytics - Sistema de Análisis de Manifiestos
 
-Sistema de análisis y visualización de datos de manifiestos para SIGMA CARGO, desarrollado en Python con interfaz gráfica moderna.
+Sistema de calculo, análisis y visualización de datos de manifiestos para SIGMA CARGO, desarrollado en Python.
 
 ## 🚀 Características
 
-- **Análisis de datos**: Procesamiento automático de archivos Excel de manifiestos
-- **Visualización**: Generación de gráficos (boxplot, barras, series temporales)
+- **Carga y visualización de datos**: Mediante un excel genera gráficos (boxplot, barras, series temporales)
 - **Configuración**: Guardado automático de tamaño y posición de ventana
-- **Base de datos**: Almacenamiento de histórico de análisis
+- **Base de datos**: Almacenamiento de histórico de análisis en SQlite
 - **Validación**: Verificación automática de archivos y periodos
 
 ## 📋 Requisitos
@@ -16,27 +15,6 @@ Sistema de análisis y visualización de datos de manifiestos para SIGMA CARGO, 
 - Windows 10/11 (probado en Windows 10)
 - Dependencias listadas en `requirements.txt`
 - wkhtmltopdf 0.12.x (opcional; requerido para exportar a PDF)
-
-## 🛠️ Instalación
-
-1. **Clonar el repositorio:**
-
-   ```bash
-   git clone [URL_DEL_REPOSITORIO]
-   cd SigmAnalytics
-   ```
-
-2. **Crear entorno virtual:**
-
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Windows
-   ```
-
-3. **Instalar dependencias:**
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## 📦 Ubicación de datos (Windows)
 
@@ -70,13 +48,14 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
 - **Mediana y promedio** de operaciones por agente
 - **Participación** de agentes representados
 - **Conteo de viajes** por categoría
-- **Evolución temporal** de métricas
+- **Evolución temporal** de métricas, comparando el mercado con la empresa
 
 ### Gráficos generados:
 
 - **Boxplot**: Distribución de operaciones
 - **Barras**: Top representados y medianas
 - **Serie temporal**: Promedios a lo largo del tiempo
+- **Grafico de torta**: Viajes (lastre o ingreso) por transportista dentro del total
 
 ### Stack utilizado:
 
@@ -97,7 +76,3 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
 - TkinterWeb — previsualización embebida de HTML en la interfaz antes de exportar a PDF
 
 - PyInstaller — creación de ejecutables distribuibles de la aplicación completa
-
-**Versión**: 1.0.0  
-**Última actualización**: Julio 2025  
-**Desarrollado por**: Equipo de Desarrollo SIGMA CARGO
