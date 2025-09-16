@@ -15,7 +15,6 @@ from src.models.viajes_representado import (
 from src.constants import FileTypes, Processing
 from src.config import LOGO_PATH
 from src.models.pdf_renderer import build_report_html, TEMPLATES_DIR, is_wkhtmltopdf_available
-from src.views.tabla_dinamica_viewer import abrir_tabla_dinamica_viewer
 from src.models.design_system import (
     get_color, get_spacing, get_font_tuple, get_dimension,
     BUTTON_PRIMARY, BUTTON_SECONDARY
@@ -33,7 +32,7 @@ class ViajesViewer(ctk.CTkToplevel):
 
     def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS):
         super().__init__(master)
-        self.title(f"Viajes por Representado - {file_type.title()}")
+        self.title(f"Reportes de Viajes - {file_type.title()}")
         self.geometry("1200x800")  # Tamaño más grande para mejor experiencia
         self.resizable(True, True)
 
@@ -72,7 +71,7 @@ class ViajesViewer(ctk.CTkToplevel):
         # Título de la sección
         title_label = ctk.CTkLabel(
             header_frame,
-            text="📋 Viajes por Representado",
+            text="Reportes de Viajes",
             font=get_font_tuple("xl", "bold"),
             text_color=self.colors["text_primary"]
         )
@@ -84,7 +83,7 @@ class ViajesViewer(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             selector_frame, 
-            text="Representado:",
+            text="Previsualizar representado:",
             font=get_font_tuple("base", "bold"),
             text_color=self.colors["text_primary"]
         ).pack(side="left", padx=(0, get_spacing("sm")))
@@ -139,42 +138,42 @@ class ViajesViewer(ctk.CTkToplevel):
         export_frame = ctk.CTkFrame(buttons_frame, fg_color="transparent")
         export_frame.pack(side="left")
 
-        self.btn_export = ctk.CTkButton(
+        # Título para los botones de exportación
+        export_title = ctk.CTkLabel(
             export_frame,
-            text="📄 Exportar PDF",
+            text="Exportar a PDF",
+            font=get_font_tuple("sm", "bold"),
+            text_color=self.colors["text_primary"]
+        )
+        export_title.pack(anchor="w", pady=(0, get_spacing("xs")))
+
+        # Frame para los botones de exportación
+        export_buttons_frame = ctk.CTkFrame(export_frame, fg_color="transparent")
+        export_buttons_frame.pack()
+
+        self.btn_export = ctk.CTkButton(
+            export_buttons_frame,
+            text="Actual",
             command=self._on_export,
             **BUTTON_SECONDARY,
             fg_color=self.colors["primary"],
             hover_color=self.colors["primary_hover"],
             text_color=self.colors["text_on_primary"],
-            width=140
+            width=100
         )
         self.btn_export.pack(side="left", padx=(0, get_spacing("xs")))
 
         self.btn_export_all = ctk.CTkButton(
-            export_frame,
-            text="📁 Todos PDF",
+            export_buttons_frame,
+            text="Todos",
             command=self._on_export_all,
             **BUTTON_SECONDARY,
             fg_color=self.colors["secondary"],
             hover_color=self.colors["secondary_hover"],
             text_color=self.colors["text_on_primary"],
-            width=120
+            width=100
         )
         self.btn_export_all.pack(side="left")
-
-        # Botón tabla dinámica (lado derecho)
-        self.btn_tabla_dinamica = ctk.CTkButton(
-            buttons_frame,
-            text="📊 TABLA DINAMICA",
-            command=self._on_tabla_dinamica,
-            **BUTTON_SECONDARY,
-            fg_color=self.colors["accent"],
-            hover_color=self.colors["accent_hover"],
-            text_color=self.colors["text_on_primary"],
-            width=160
-        )
-        self.btn_tabla_dinamica.pack(side="right")
 
         # Aviso proactivo si falta wkhtmltopdf
         self._wkhtml_disponible = is_wkhtmltopdf_available()
@@ -483,13 +482,6 @@ class ViajesViewer(ctk.CTkToplevel):
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    def _on_tabla_dinamica(self) -> None:
-        try:
-            # Obtener los códigos de representados desde los items
-            codigos_representados = [codigo for codigo, _ in self.items_cod_nombre]
-            abrir_tabla_dinamica_viewer(self, self.df_original, codigos_representados, self.periodo, self.file_type)
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al abrir tabla dinámica: {str(e)}")
 
 
 def abrir_viajes_viewer(master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS) -> None:

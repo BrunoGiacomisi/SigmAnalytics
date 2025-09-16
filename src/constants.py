@@ -61,7 +61,7 @@ class Messages:
     ARCHIVO_VALIDO = "✅ Archivo válido"
     ARCHIVO_INVALIDO_ICONO = "❌ Archivo inválido"
     ERROR_LECTURA = "❌ Error al leer archivo"
-    LASTRES_CARGADOS = "✅ Datos de lastres cargados. Podés verlos en 'Viajes por Representado'"
+    LASTRES_CARGADOS = "✅ Datos de lastres cargados."
 
 # Colores de la aplicación
 class Colors:

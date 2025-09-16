@@ -22,7 +22,7 @@ class TablaDinamicaViewer(ctk.CTkToplevel):
 
     def __init__(self, master, df_original: pd.DataFrame, codigos_representados: List[str], periodo: str, file_type: str = FileTypes.INGRESOS):
         super().__init__(master)
-        self.title(f"Tabla Dinámica - Resumen de Transportes ({file_type.title()})")
+        self.title(f"Tabla Dinámica - {file_type.title()}")
         self.geometry("1430x890")
         self.resizable(True, True)
 

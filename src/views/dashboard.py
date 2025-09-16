@@ -1,6 +1,7 @@
 import customtkinter as ctk  # Librería para una interfaz gráfica moderna basada en tkinter
 from tkinter import messagebox  # Utilidades para mostrar mensajes emergentes
 from src.views.viajes_viewer import abrir_viajes_viewer
+from src.views.tabla_dinamica_viewer import abrir_tabla_dinamica_viewer
 from src.models import db as db_model
 from typing import Optional
 from src.config import (
@@ -99,6 +100,7 @@ def crear_dashboard():
         design_manager.apply_widget_design(boton_ingresos, "button_primary")
         design_manager.apply_widget_design(boton_lastres, "button_primary")
         design_manager.apply_widget_design(boton_info_datos, "button_secondary")
+        design_manager.apply_widget_design(boton_tabla_dinamica, "button_secondary")
         design_manager.apply_widget_design(boton_viajes, "button_secondary")
         
         # Labels y títulos
@@ -256,6 +258,30 @@ def crear_dashboard():
     boton_info_datos.pack(side="left", padx=(0, get_spacing("sm")))
     theme_widgets['boton_info_datos'] = boton_info_datos
 
+    # Botón para abrir tabla dinámica
+    def abrir_tabla_dinamica_dashboard() -> None:
+        if df_cargado is None or not periodo_cargado:
+            messagebox.showinfo("Información", "Primero cargá y procesá un manifiesto válido para poder visualizar la tabla dinámica.")
+            return
+        try:
+            abrir_tabla_dinamica_viewer(ventana, df_cargado, CODIGOS_REPRESENTADOS, periodo_cargado, tipo_archivo_actual)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    boton_tabla_dinamica = ctk.CTkButton(
+        master=right_section,
+        text="Tabla Dinámica",
+        command=abrir_tabla_dinamica_dashboard,
+        width=get_dimension("button_min_width"),
+        **BUTTON_SECONDARY,
+        fg_color="#5DADE2",  # Azul claro
+        hover_color="#3498DB",  # Azul más intenso al hacer hover
+        text_color=colors["text_on_primary"],
+        state='disabled'
+    )
+    boton_tabla_dinamica.pack(side="left", padx=get_spacing("sm"))
+    theme_widgets['boton_tabla_dinamica'] = boton_tabla_dinamica
+
     # ═══════════════════════════════════════════════════════════════════════════════
     # CONTENIDO PRINCIPAL SCROLLABLE
     # ═══════════════════════════════════════════════════════════════════════════════
@@ -301,6 +327,16 @@ def crear_dashboard():
     # Status del archivo en el centro del header (debajo del botón principal)
     status_frame = ctk.CTkFrame(master=center_section, fg_color="transparent")
     status_frame.pack(side="bottom", fill="x", pady=(get_spacing("xs"), 0))
+    
+    # Mensaje de bienvenida inicial
+    welcome_message = ctk.CTkLabel(
+        master=status_frame,
+        text="🚀 Carga uno de los dos archivos para empezar",
+        font=get_font_tuple("base", "bold"),
+        text_color=colors["accent"]
+    )
+    welcome_message.pack()
+    theme_widgets['welcome_message'] = welcome_message
     
     # Label para archivo seleccionado
     label_archivo = ctk.CTkLabel(
@@ -509,6 +545,9 @@ def crear_dashboard():
                 spinner.configure(text="")
                 boton_ingresos.configure(state='normal')
                 boton_lastres.configure(state='normal')
+                # Si no hay archivo cargado, mostrar mensaje de bienvenida
+                if df_cargado is None:
+                    welcome_message.pack()
                 return
             
             tipo_archivo_actual = file_type
@@ -542,6 +581,9 @@ def crear_dashboard():
                         df_cargado = df_local
                         periodo_cargado = periodo_local
                         
+                        # Ocultar mensaje de bienvenida una vez que se carga un archivo
+                        welcome_message.pack_forget()
+                        
                         if file_type == FileTypes.LASTRES:
                             # Para lastres, mostrar mensaje especial y ocultar KPIs/gráficos
                             feedback_icon.set(Messages.LASTRES_CARGADOS)
@@ -573,6 +615,7 @@ def crear_dashboard():
                         boton_lastres.configure(state='normal')
                         if df_cargado is not None and periodo_cargado:
                             boton_viajes.configure(state='normal')
+                            boton_tabla_dinamica.configure(state='normal')
                     ventana.after(0, on_success)
 
                 except Exception as e:
@@ -657,10 +700,10 @@ def crear_dashboard():
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    # Botón "Viajes por Representado" también en el header (lado derecho)
+    # Botón "Reportes de Viajes" también en el header (lado derecho)
     boton_viajes = ctk.CTkButton(
         master=right_section,
-        text="Viajes por Representado",
+        text="Reportes de Viajes",
         command=abrir_visualizador,
         **BUTTON_SECONDARY,
         fg_color=colors["info"],
@@ -669,7 +712,7 @@ def crear_dashboard():
         state='disabled',
         width=160
     )
-    boton_viajes.pack(side="left", padx=(get_spacing("sm"), 0))
+    boton_viajes.pack(side="left", padx=(0, 0))
     theme_widgets['boton_viajes'] = boton_viajes
 
     # ═══════════════════════════════════════════════════════════════════════════════
