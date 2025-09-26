@@ -80,7 +80,9 @@ class GmailDraftService:
                     flow = InstalledAppFlow.from_client_secrets_file(
                         str(CREDENTIALS_FILE), SCOPES
                     )
-                    creds = flow.run_local_server(port=0)
+                    # Forzar selección de cuenta
+                    flow.authorization_url(prompt='select_account')
+                    creds = flow.run_local_server(port=8080)
                     logger.info("Autenticación OAuth completada")
                 except Exception as e:
                     logger.error(f"Error en flujo OAuth: {e}")
