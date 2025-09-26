@@ -22,6 +22,11 @@ Jinja2>=3.1.0
 pdfkit>=1.0.0
 tkinterweb>=3.23.7
 
+# Gmail integration
+google-api-python-client>=2.100.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=1.0.0
+
 # Optional: For enhanced development
 # pytest>=7.0.0  # For testing
 # black>=23.0.0  # For code formatting

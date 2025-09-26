@@ -1,0 +1,703 @@
+{
+  "888801015969": { "nombre": "RONDON MAXIMILIANO", "emails": [], "cc": [], "bcc": [] },
+  "888801015958": { "nombre": "ACOPIO AREQUITO S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015938": { "nombre": "COSTA JAVIER DAVID", "emails": [], "cc": [], "bcc": [] },
+  "888801014929": { "nombre": "FORESTAL GARUHAPE S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801014753": { "nombre": "EL VASCO JUAN S.R.L.", "emails": [], "cc": [], "bcc": [] },
+  "888801015443": { "nombre": "GERHOLD CLAUDIO FRANCISCO", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015433": { 
+    "nombre": "SARTORE LEONARDO JAVIER", 
+    "emails": [
+      "leonardo2javier.ljs@gmail.com",
+      "leonardojaviersartore@gmail.com"
+    ], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015939": { "nombre": "EMPRESA DUMAS S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015924": { "nombre": "RUSH S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015922": { "nombre": "TRANSPORTE LOS JUANES S.A", "emails": [], "cc": [], "bcc": [] },
+  "888801015592": { "nombre": "EIMER ESTEBAN PABLO", "emails": [], "cc": [], "bcc": [] },
+  "888801015598": { "nombre": "RIOS GUILLERMO CARLOS", "emails": [], "cc": [], "bcc": [] },
+  "888801015697": { "nombre": "BELTRAME NERI FIDEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015926": { "nombre": "TRANSPORTE Y LOGISTICA ORO AUSTRAL S.A.S.", "emails": [], "cc": [], "bcc": [] },
+  "888801015720": { "nombre": "BERNARDI MARTIN OSCAR", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015690": { 
+    "nombre": "CACCIAVILLANI S.A.S.", 
+    "emails": [
+      "cacciavillanisas@gmail.com",
+      "arnaumanuel@live.com"
+    ], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015347": { "nombre": "LAS CUATRO MS SRL", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015379": { 
+    "nombre": "RIFFEL CARLOS ENRIQUE", 
+    "emails": ["carloseriffeltransporte@gmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015979": { 
+    "nombre": "TRANSPORTE BAILO HNOS S.A.", 
+    "emails": [
+      "administracion2@transportesbailo.com.ar",
+      "comercial.tbh@gmail.com",
+      "comercial@transportesbailo.com.ar",
+      "trafico@transportesbailo.com.ar"
+    ], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888801015942": { "nombre": "TRANSP. DON JUANERO S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015519": { "nombre": "TRANSPORTE MARYOLL S.R.L.", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015558": { 
+    "nombre": "VELZI JORGE ABEL", 
+    "emails": ["transportejorvel@gmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015550": { 
+    "nombre": "REINOSO HECTOR FABRICIO", 
+    "emails": ["reinosofabricio@hotmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015867": { "nombre": "CARABALLO HERMANOS S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015629": { "nombre": "CORRAO LUCAS DAVID", "emails": [], "cc": [], "bcc": [] },
+  "888801015830": { "nombre": "DELLA CHIESA DAVID", "emails": [], "cc": [], "bcc": [] },
+  "888801015537": { "nombre": "BARBARA FERNANDO GABRIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015559": { "nombre": "MARTINEZ SANDRA ESTER", "emails": [], "cc": [], "bcc": [] },
+  "888801015891": { "nombre": "SCHNEIDER JUAN MANUEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015890": { "nombre": "FLORES PABLO HERNAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015929": { "nombre": "TRANSPORTE ANDESUR S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015870": { "nombre": "FRIGORIFICO SAN PEDRO S.R.L.", "emails": [], "cc": [], "bcc": [] },
+  "888801015786": { "nombre": "EMPRESA ROMERO S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015879": { "nombre": "TRANSPORTE BALLESTEROS S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015947": { "nombre": "EXPRESO DEL NORTE S.R.L.", "emails": [], "cc": [], "bcc": [] },
+  "888801015948": { "nombre": "COOPERATIVA DE TRANSPORTE S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015949": { "nombre": "FRIGORIFICO LAS SIERRAS", "emails": [], "cc": [], "bcc": [] },
+  "888801015950": { "nombre": "GANADERA RIVADAVIA S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015951": { "nombre": "PEREYRA TRANSPORTES", "emails": [], "cc": [], "bcc": [] },
+  "888801015952": { "nombre": "EXPRESO SUR S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015953": { "nombre": "HERNANDEZ LOGISTICA", "emails": [], "cc": [], "bcc": [] },
+  "888801015954": { "nombre": "AGROINDUSTRIA SANTA ROSA", "emails": [], "cc": [], "bcc": [] },
+  "888801015955": { "nombre": "MOLINO CENTRAL S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015956": { "nombre": "EXPORTADORA DEL LITORAL", "emails": [], "cc": [], "bcc": [] },
+  "888801015957": { "nombre": "FRIGORIFICO DEL SUR", "emails": [], "cc": [], "bcc": [] },
+  "888801015960": { "nombre": "TRANSPORTE EL PAMPA", "emails": [], "cc": [], "bcc": [] },
+  "888801015961": { "nombre": "CEREALERA PAMPEANA", "emails": [], "cc": [], "bcc": [] },
+  "888801015945": { "nombre": "ISOLA VERDE I SRL", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015534": { 
+    "nombre": "AVANZINI DARDO RENE", 
+    "emails": ["mariola_lopez@hotmail.com.ar"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888801015599": { "nombre": "GERAVI JULIO CESAR", "emails": [], "cc": [], "bcc": [] },
+  "888801015541": { "nombre": "DELASOIE GONZALO ESTEBAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015829": { "nombre": "BUFFA GUSTAVO FABRICIO", "emails": [], "cc": [], "bcc": [] },
+  "888801015546": { "nombre": "GUIONET ROBERTO ELOY", "emails": [], "cc": [], "bcc": [] },
+  "888801015899": { "nombre": "DOMINGUEZ CESAR ORLANDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015624": { "nombre": "DON CHOLO SRL", "emails": [], "cc": [], "bcc": [] },
+  "888801015642": { "nombre": "HEFFEL MATIAS EZEQUIEL", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015637": { 
+    "nombre": "MOSSER JORGE LUIS", 
+    "emails": ["kakocaseros@hotmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888803015257": { "nombre": "NECKEL TRANSPORTES LTDA", "emails": [], "cc": [], "bcc": [] },
+  "888801015494": { "nombre": "IGLESIAS MARCOS ANTONIO", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015480": { 
+    "nombre": "VARONA RAMIRO HERNAN", 
+    "emails": [
+      "transportevarona@outlook.com",
+      "agus_332@hotmail.com"
+    ], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888801014987": { "nombre": "WEIMER NORBERTO RODOLFO", "emails": [], "cc": [], "bcc": [] },
+  "888801015764": { "nombre": "MARZORATTI EMILIO FABIAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015625": { "nombre": "MOINE LISANDRO JOSE", "emails": [], "cc": [], "bcc": [] },
+  "888801015868": { "nombre": "PULMHO TRUCK S. A. S.", "emails": [], "cc": [], "bcc": [] },
+  "888801015540": { "nombre": "LA GRINGA TRANSPORTES SRL", "emails": [], "cc": [], "bcc": [] },
+  "888801015575": { "nombre": "MOSSER ROBERTO CARLOS", "emails": [], "cc": [], "bcc": [] },
+  
+  "888805014533": { 
+    "nombre": "LUFFE LOG TRANSPORTES S.A.", 
+    "emails": [
+      "contabilidade@luffetransportes.com",
+      "jaimir@luffetransportes.com",
+      "arlei@svmsa.com.py"
+    ], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888801015665": { "nombre": "ROBIN ANIBAL JOSE", "emails": [], "cc": [], "bcc": [] },
+  "888801015576": { "nombre": "UBEDA CLAUDIO ANDRES", "emails": [], "cc": [], "bcc": [] },
+  "888801015901": { "nombre": "RAUCH LEATHERS S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015779": { "nombre": "ASERRADERO SAN JOSE SRL", "emails": [], "cc": [], "bcc": [] },
+  "888801015887": { "nombre": "MARENGO HERMANOS SOCIEDAD ANONIMA", "emails": [], "cc": [], "bcc": [] },
+  "888801015566": { "nombre": "FLORES JAVIER", "emails": [], "cc": [], "bcc": [] },
+  "888801015488": { "nombre": "CANTERO MARIO ALBERTO", "emails": [], "cc": [], "bcc": [] },
+  "888801015581": { "nombre": "SORIA FERNANDO DANIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015487": { "nombre": "ROMERO GERMAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015932": { "nombre": "TRANSPORTE MARLENE SRL", "emails": [], "cc": [], "bcc": [] },
+  "888801015681": { "nombre": "GOMEZ HUGO", "emails": [], "cc": [], "bcc": [] },
+  "888801015682": { "nombre": "CARRIZO ALBERTO", "emails": [], "cc": [], "bcc": [] },
+  "888801015683": { "nombre": "ALVAREZ MARCELO", "emails": [], "cc": [], "bcc": [] },
+  "888801015684": { "nombre": "LOPEZ CARLOS", "emails": [], "cc": [], "bcc": [] },
+  "888801015685": { "nombre": "SUAREZ EDUARDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015686": { "nombre": "MORALES HECTOR", "emails": [], "cc": [], "bcc": [] },
+  "888801015687": { "nombre": "CASTRO JULIAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015688": { "nombre": "TORRES ANDRES", "emails": [], "cc": [], "bcc": [] },
+  "888801015689": { "nombre": "FERNANDEZ LUIS", "emails": [], "cc": [], "bcc": [] },
+  "888801015691": { "nombre": "PEREZ GABRIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015692": { "nombre": "SANCHEZ MIGUEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015693": { "nombre": "RAMIREZ NICOLAS", "emails": [], "cc": [], "bcc": [] },
+  "888801015695": { "nombre": "MENDEZ RICARDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015696": { "nombre": "SALAZAR DIEGO", "emails": [], "cc": [], "bcc": [] },
+  "888801015698": { "nombre": "CARDENAS OSCAR", "emails": [], "cc": [], "bcc": [] },
+  "888801015743": { "nombre": "LOSANTO EXEQUIEL JOSE ANTONIO", "emails": [], "cc": [], "bcc": [] },
+  "888801015279": { "nombre": "MC CORMACK GABRIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015740": { "nombre": "MOSSER PABLO JAVIER", "emails": [], "cc": [], "bcc": [] },
+  "888801015773": { "nombre": "TRANSPORTE DON LOPEZ S.A.", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015736": { 
+    "nombre": "MULLER WALTER MATIAS", 
+    "emails": ["lostrespibesWM@outlook.com.ar"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015660": { "nombre": "SPINOSA CRISTIAN LORENZO", "emails": [], "cc": [], "bcc": [] },
+  "888801015593": { "nombre": "MEDINA HECTOR ALBERTO", "emails": [], "cc": [], "bcc": [] },
+  "888801015722": { "nombre": "OBRADOVICH MATEO ENRIQUE", "emails": [], "cc": [], "bcc": [] },
+  "888801015547": { "nombre": "SU FRIGORIFICO S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015712": { "nombre": "REBIGLIONE CESAR DANIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015702": { "nombre": "RICHARD HERNAN FACUNDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015872": { "nombre": "RONDOLETTO DIEGO ELVIN", "emails": [], "cc": [], "bcc": [] },
+  "888801015533": { "nombre": "TESSORE ALBANO SILVESTRE", "emails": [], "cc": [], "bcc": [] },
+  "888801015757": { "nombre": "PERRON ALESIO MATEO", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015755": { 
+    "nombre": "BURONE JUAN MANUEL", 
+    "emails": ["jcruzburone@hotmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015653": { "nombre": "TONETTO MAURICIO GABRIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015545": { "nombre": "TRANSPORTES SIFER S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015739": { "nombre": "DE ZAN OSCAR ALCIDES", "emails": [], "cc": [], "bcc": [] },
+  "888801015605": { "nombre": "MERCOTRUCK INTERNACIONAL S.A.S.", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015603": { 
+    "nombre": "CRISTHIAN MARIO PRADA", 
+    "emails": ["gabriela_cprada@hotmail.com.ar"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015756": { "nombre": "CARBONEX S.A.S", "emails": [], "cc": [], "bcc": [] },
+  "888801015664": { "nombre": "TRANSPORTES VAQUER S.A.", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015744": { 
+    "nombre": "VALGONIO NICOLAS RAMON", 
+    "emails": ["logisticavalgonio@hotmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888801015731": { "nombre": "GONZALEZ OMAR ANTONIO", "emails": [], "cc": [], "bcc": [] },
+  "888801015749": { "nombre": "VENUTTI MAURO LEONEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015213": { "nombre": "LOPEZ NESTOR ALEJANDRO", "emails": [], "cc": [], "bcc": [] },
+  "888801015214": { "nombre": "ESCOBAR JUAN MANUEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015215": { "nombre": "FERNANDEZ SERGIO ARIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015216": { "nombre": "AGUILAR RAMON", "emails": [], "cc": [], "bcc": [] },
+  "888801015217": { "nombre": "SOTO RICARDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015218": { "nombre": "CABRERA LUIS", "emails": [], "cc": [], "bcc": [] },
+  "888801015219": { "nombre": "ORTIZ MIGUEL ANGEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015220": { "nombre": "SOSA MARCELO", "emails": [], "cc": [], "bcc": [] },
+  "888801015221": { "nombre": "CARRASCO JORGE", "emails": [], "cc": [], "bcc": [] },
+  "888801015222": { "nombre": "ESPINOZA JUAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015223": { "nombre": "RODRIGUEZ FRANCISCO", "emails": [], "cc": [], "bcc": [] },
+  "888801015224": { "nombre": "MARTINEZ GUSTAVO", "emails": [], "cc": [], "bcc": [] },
+  "888801015225": { "nombre": "GOMEZ EDUARDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015226": { "nombre": "DIAZ LEONARDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015227": { "nombre": "MENDOZA CARLOS", "emails": [], "cc": [], "bcc": [] },
+  "888801015228": { "nombre": "FARIAS PABLO", "emails": [], "cc": [], "bcc": [] },
+  "888801015229": { "nombre": "VEGA MARTIN", "emails": [], "cc": [], "bcc": [] },
+  "888801015230": { "nombre": "RUIZ GONZALO", "emails": [], "cc": [], "bcc": [] },
+  "888801015231": { "nombre": "GODOY SANTIAGO", "emails": [], "cc": [], "bcc": [] },
+  "888801015232": { "nombre": "CABRAL JAVIER", "emails": [], "cc": [], "bcc": [] },
+  "888801015233": { "nombre": "LOPEZ MIGUEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015234": { "nombre": "PONCE DANIEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015705": { "nombre": "BOLZAN RAUL DARIO", "emails": [], "cc": [], "bcc": [] },
+  "888801015819": { "nombre": "CHIARAVIGLIO ALEXANDER ESTEBAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015694": { "nombre": "PREISLER RUBEN ALFREDO", "emails": [], "cc": [], "bcc": [] },
+  "888801015716": { "nombre": "ROSSI PRISCILA PAMELA", "emails": [], "cc": [], "bcc": [] },
+  "888801015846": { "nombre": "AGO-PAU S.R.L.", "emails": [], "cc": [], "bcc": [] },
+  "888801015706": { "nombre": "CURCHO HORACIO GABRIEL", "emails": [], "cc": [], "bcc": [] },
+  
+  "213460120012": { 
+    "nombre": "SETELAND", 
+    "emails": ["transporteseteland@gmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888801015763": { "nombre": "FAUST GERMAN MAXIMILIANO", "emails": [], "cc": [], "bcc": [] },
+  "888801015700": { "nombre": "FRENE CRISTIAN JAIR", "emails": [], "cc": [], "bcc": [] },
+  "888801015765": { "nombre": "HUCK LEANDRO MARCELO", "emails": [], "cc": [], "bcc": [] },
+  "888801015771": { "nombre": "CARRICARTE INES RAQUEL", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015770": { 
+    "nombre": "PIERSIMONI JUAN ALBERTO", 
+    "emails": ["jjpiersimoni@gmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888805014513": { "nombre": "ITACORA LOGISTICA S.A.", "emails": [], "cc": [], "bcc": [] },
+  "888801015833": { "nombre": "BOARINI JOSE HERNAN", "emails": [], "cc": [], "bcc": [] },
+  "888805014526": { "nombre": "PULQUI PACK PARAGUAY S.A.", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015778": { 
+    "nombre": "HEFFEL HUGO OSCAR", 
+    "emails": ["transchiqui33@hotmail.com.ar"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+
+  "888801015789": { "nombre": "MAIZTEGUI HERNAN RAFAEL", "emails": [], "cc": [], "bcc": [] },
+  "888801015825": { "nombre": "ESTABLECIMIENTO DON AVELINO SRL", "emails": [], "cc": [], "bcc": [] },
+  "888801015800": { "nombre": "MAZZOLI JUAN PAULINO", "emails": [], "cc": [], "bcc": [] },
+  "888801015799": { "nombre": "MAIZTEGUI ALBERICO MARIA JUAN", "emails": [], "cc": [], "bcc": [] },
+  "888801015812": { "nombre": "DELGADO MARCELO JAVIER", "emails": [], "cc": [], "bcc": [] },
+  
+  "888801015798": { 
+    "nombre": "PASCAL OSVALDO ANIBAL", 
+    "emails": ["osvaldoanibalpascal@hotmail.com"], 
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ], 
+    "bcc": [] 
+  },
+  
+  "888803014666": {
+    "nombre": "REITER TRANSPORTES E LOGISTICA LTDA",
+    "emails": [
+      "tiago.ferreira@reiterlog.com",
+      "thaina.thaina@reiterlog.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+  
+  "888801014862": {
+    "nombre": "TRANSPORTES ELOIS SRL",
+    "emails": [
+      "transporte.elois@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+  
+  "888801015367": {
+    "nombre": "ABRARD EDGARDO MARCELO",
+    "emails": [
+      "camila@transporteabrard.com.ar",
+      "maxi@transporteabrard.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015521": {
+    "nombre": "ABATEDAGA CAMPO Y NEGOCIOS SRL",
+    "emails": [
+      "administracion@abatedaga.com",
+      "CAMPOYNEGOCIOS@abatedaga.com",
+      "Guillermo.a@icloud.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015508": {
+    "nombre": "MALUAR S.A.S.",
+    "emails": [
+      "maluarsas@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015654": {
+    "nombre": "TRANS PACHIS S.R.L.",
+    "emails": [
+      "expresocolon@gmail.com",
+      "expreso_colon@hotmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015530": {
+    "nombre": "FARABELLO JUAN MANUEL",
+    "emails": [
+      "transportefarabello@hotmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015858": {
+    "nombre": "MANTOVANI MARIA VERONICA",
+    "emails": [
+      "transporteelfigu17@gmail.com",
+      "Silvinmantovani2@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015491": {
+    "nombre": "LOGISTICA RAMIREZ SRL",
+    "emails": [
+      "logisticaramirezsrl@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801014986": {
+    "nombre": "LUCCERINI RICARDO JAVIER",
+    "emails": [
+      "administracion@transluccerini.com.ar",
+      "facturacion@transluccerini.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015289": {
+    "nombre": "IK S.A.",
+    "emails": [
+      "info@ik-sa.com",
+      "ingridkunath26@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015528": {
+    "nombre": "LECIA GUILLERMO FABIAN",
+    "emails": [
+      "transportesguillermolecia@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+  
+  "888801015903": {
+    "nombre": "BIZZOTTO EDUARDO ALBERTO",
+    "emails": [
+      "david@transportesbizzotto.com",
+      "administracion@transportesbizzotto.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015859": {
+    "nombre": "WEIMER SRL",
+    "emails": [
+      "transporte@weimersrl.com",
+      "admtransporte@weimersrl.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015473": {
+    "nombre": "BASSI JORGE ALBERTO",
+    "emails": [
+      "transportesbassi@hotmail.com",
+      "transpbassidavid@hotmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015699": {
+    "nombre": "MOREND PABLO MARCELO",
+    "emails": [
+      "cr.alejandrosimon@gmail.com",
+      "m_ema22@hotmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015661": {
+    "nombre": "TRANSPORTES FONTANA SRL",
+    "emails": [
+      "transporte_fontana@hotmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015723": {
+    "nombre": "CETTOUR NORMA MERCEDES",
+    "emails": [
+      "nrm9@live.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015701": {
+    "nombre": "ORTEGA GABRIEL LEONARDO",
+    "emails": [
+      "marianavictoriamarshall@gmail.com",
+      "Trafico_1@expresojumbo.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+  
+  "888801015873": {
+    "nombre": "TRANSPORTE FRIOS DEL NORTE S.R.L.",
+    "emails": [
+      "abusto@friosdelnorte.com.ar",
+      "ayrtonaraujo@friosdelnorte.com.ar",
+      "chayward@friosdelnorte.com.ar",
+      "jsaid@friosdelnorte.com.ar",
+      "lenysaguilera@friosdelnorte.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015711": {
+    "nombre": "BIDEGAIN SRL",
+    "emails": [
+      "bidegainsrl@gmail.com",
+      "Bidegainmariano@yahoo.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015439": {
+    "nombre": "VENCYA S.A.",
+    "emails": [
+      "agustin@vencya.com.ar",
+      "jeremiaserhardt@vencya.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015212": {
+    "nombre": "WAIGEL MARTIN SEBASTIAN",
+    "emails": [
+      "transenrique87@live.com.ar"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015828": {
+    "nombre": "REIESUANE CRISTIAN FRANCISCO JESUS",
+    "emails": [
+      "entrerriano36@gmail.com",
+      "vc.asistencia@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015758": {
+    "nombre": "SERI SEBASTIAN GERARDO",
+    "emails": [
+      "sebaseri81@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015815": {
+    "nombre": "ABRARD MARCELO EDGARDO",
+    "emails": [
+      "marcelo_abrard@hotmail.com",
+      "transportemarceloabrard@gmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  },
+ 
+  "888801015780": {
+    "nombre": "LEICKER S.R.L.",
+    "emails": [
+      "Transleicker@hotmail.com"
+    ],
+    "cc": [
+      "mariel@sigmacargo.com.uy",
+      "martin@sigmacargo.com.uy"
+    ],
+    "bcc": []
+  }
+}

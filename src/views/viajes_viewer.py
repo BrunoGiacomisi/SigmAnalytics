@@ -2,6 +2,8 @@ import customtkinter as ctk
 from tkinter import messagebox
 from typing import Optional, List
 import pandas as pd
+import threading
+from pathlib import Path
 
 from src.models.viajes_representado import (
     DEFAULT_COLUMNS_ORDER,
@@ -20,6 +22,8 @@ from src.models.design_system import (
     BUTTON_PRIMARY, BUTTON_SECONDARY
 )
 from src.models.design_manager import design_manager
+from src.services.gmail_service import GmailDraftService
+from src.services.representados_contactos import get_contact_info
 
 try:  # WebView para previsualizar HTML (sin depender del navegador)
     from tkinterweb import HtmlFrame  # type: ignore
@@ -174,6 +178,47 @@ class ViajesViewer(ctk.CTkToplevel):
             width=100
         )
         self.btn_export_all.pack(side="left")
+
+        # Split button de envío Gmail (lado derecho)
+        gmail_frame = ctk.CTkFrame(buttons_frame, fg_color="transparent")
+        gmail_frame.pack(side="right")
+
+        # Título para los botones de Gmail
+        gmail_title = ctk.CTkLabel(
+            gmail_frame,
+            text="Enviar por Gmail",
+            font=get_font_tuple("sm", "bold"),
+            text_color=self.colors["text_primary"]
+        )
+        gmail_title.pack(anchor="w", pady=(0, get_spacing("xs")))
+
+        # Frame para los botones de Gmail
+        gmail_buttons_frame = ctk.CTkFrame(gmail_frame, fg_color="transparent")
+        gmail_buttons_frame.pack()
+
+        self.btn_send_current = ctk.CTkButton(
+            gmail_buttons_frame,
+            text="Actual",
+            command=self._on_send_current_gmail,
+            **BUTTON_SECONDARY,
+            fg_color="#27ae60",  # Verde para Gmail
+            hover_color="#229954",
+            text_color="white",
+            width=100
+        )
+        self.btn_send_current.pack(side="left", padx=(0, get_spacing("xs")))
+
+        self.btn_send_all = ctk.CTkButton(
+            gmail_buttons_frame,
+            text="Todos",
+            command=self._on_send_all_gmail,
+            **BUTTON_SECONDARY,
+            fg_color="#e67e22",  # Naranja para envío masivo
+            hover_color="#d35400",
+            text_color="white",
+            width=100
+        )
+        self.btn_send_all.pack(side="left")
 
         # Aviso proactivo si falta wkhtmltopdf
         self._wkhtml_disponible = is_wkhtmltopdf_available()
@@ -481,6 +526,223 @@ class ViajesViewer(ctk.CTkToplevel):
                 messagebox.showinfo("Exportación", "No se generó ningún PDF.")
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def _on_send_current_gmail(self) -> None:
+        """Envía el reporte actual por Gmail como borrador."""
+        try:
+            nombre_sel = self.display_var.get()
+            codigo = self.codigo_por_nombre.get(nombre_sel, "")
+            
+            if not codigo:
+                messagebox.showerror("Error", "No se pudo obtener el código del representado seleccionado")
+                return
+            
+            # Ejecutar en hilo de fondo para no bloquear la UI
+            thread = threading.Thread(
+                target=self._send_gmail_background,
+                args=(codigo, nombre_sel, False),
+                daemon=True
+            )
+            thread.start()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error iniciando envío: {e}")
+
+    def _on_send_all_gmail(self) -> None:
+        """Envía todos los reportes por Gmail como borradores."""
+        try:
+            if not self.items_cod_nombre:
+                messagebox.showinfo("Envío Gmail", "No hay representados con viajes en este período.")
+                return
+            
+            # Ejecutar en hilo de fondo para no bloquear la UI
+            thread = threading.Thread(
+                target=self._send_gmail_background,
+                args=(None, None, True),
+                daemon=True
+            )
+            thread.start()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error iniciando envío masivo: {e}")
+
+    def _send_gmail_background(self, codigo: Optional[str], nombre: Optional[str], send_all: bool) -> None:
+        """
+        Maneja el envío por Gmail en segundo plano.
+        
+        Args:
+            codigo: Código del representado (solo para envío individual)
+            nombre: Nombre del representado (solo para envío individual)
+            send_all: Si True, envía a todos los representados
+        """
+        try:
+            gmail_service = GmailDraftService()
+            
+            if send_all:
+                # Envío masivo
+                resultados = []
+                representados_sin_email = []
+                
+                for cod, nom in self.items_cod_nombre:
+                    resultado = self._create_gmail_draft_for_representado(gmail_service, cod, nom)
+                    if resultado["success"]:
+                        resultados.append(resultado)
+                    else:
+                        if "sin correo" in resultado["message"].lower():
+                            representados_sin_email.append(nom)
+                        else:
+                            # Error real, mostrar inmediatamente
+                            self.after(0, lambda msg=resultado["message"]: messagebox.showerror("Error Gmail", msg))
+                            return
+                
+                # Mostrar resumen
+                mensaje_resumen = f"Borradores creados: {len(resultados)}"
+                if representados_sin_email:
+                    mensaje_resumen += f"\nRepresentados sin correo: {len(representados_sin_email)}"
+                    mensaje_resumen += f"\n({', '.join(representados_sin_email[:3])}" + ("..." if len(representados_sin_email) > 3 else "") + ")"
+                
+                self.after(0, lambda: messagebox.showinfo("Envío Gmail - Resumen", mensaje_resumen))
+                
+            else:
+                # Envío individual
+                resultado = self._create_gmail_draft_for_representado(gmail_service, codigo, nombre)
+                self.after(0, lambda: messagebox.showinfo("Envío Gmail", resultado["message"]))
+                
+        except Exception as e:
+            error_msg = f"Error en envío Gmail: {e}"
+            self.after(0, lambda: messagebox.showerror("Error Gmail", error_msg))
+
+    def _create_gmail_draft_for_representado(self, gmail_service: GmailDraftService, codigo: str, nombre: str) -> dict:
+        """
+        Crea un borrador de Gmail para un representado específico.
+        
+        Args:
+            gmail_service: Instancia del servicio Gmail
+            codigo: Código del representado
+            nombre: Nombre del representado
+            
+        Returns:
+            Diccionario con resultado de la operación
+        """
+        try:
+            # Obtener información de contacto
+            contact_info = get_contact_info(codigo)
+            if not contact_info or not contact_info.get("emails"):
+                # Crear borrador sin destinatarios para que el usuario los complete
+                contact_info = {
+                    "emails": [],
+                    "cc": ["mariel@sigmacargo.com.uy", "martin@sigmacargo.com.uy"],
+                    "bcc": []
+                }
+                mensaje_contacto = f"Representado {nombre} sin correo configurado. Borrador creado sin destinatarios."
+            else:
+                mensaje_contacto = f"Borrador creado para {nombre}"
+            
+            # Generar PDF si no existe
+            df = obtener_viajes_representado(self.df_original, codigo, self.periodo)
+            if df.empty:
+                return {
+                    "success": False,
+                    "message": f"No hay viajes para {nombre} en el período {self.periodo}"
+                }
+            
+            # Usar columnas y precio según el tipo de archivo
+            if self.file_type == FileTypes.LASTRES:
+                columnas = Processing.LASTRES_COLUMNS_ORDER
+                precio = Processing.LASTRES_PRICE_PER_TRIP
+            else:
+                columnas = DEFAULT_COLUMNS_ORDER  
+                precio = Processing.DEFAULT_PRICE_PER_TRIP
+                
+            df = filtrar_columnas_relevantes(df, columnas=columnas, precio_por_viaje=precio)
+            stats = calcular_estadisticas_viajes(df, precio_por_viaje=precio)
+            
+            # Generar PDF
+            ruta_pdf = generar_pdf_para_representado(
+                self.df_original,
+                codigo=codigo,
+                periodo=self.periodo,
+                nombre_representado=nombre,
+                precio_por_viaje=stats["precio_por_viaje"],
+                columnas=columnas,
+                logo_path=str(LOGO_PATH),
+                file_type=self.file_type
+            )
+            
+            # Construir asunto y cuerpo del correo
+            total_viajes = len(df)
+            monto_total = stats.get("total", 0)
+            
+            asunto = f"Resumen de Viajes - {nombre} - {self.periodo}"
+            
+            cuerpo_html = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: #00587A; margin: 0;">Sigma Cargo</h2>
+                        <p style="color: #666; margin: 5px 0;">Resumen de Viajes</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #00587A; margin-top: 0;">Estimado/a {nombre}</h3>
+                        <p>Adjuntamos el resumen detallado de viajes correspondiente al período <strong>{self.periodo}</strong>.</p>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Código:</strong></td>
+                                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{codigo}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total de viajes:</strong></td>
+                                    <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{total_viajes}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0;"><strong>Monto total:</strong></td>
+                                    <td style="padding: 8px 0; text-align: right; color: #00587A; font-weight: bold;">$ {monto_total:,.0f}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <p>Para cualquier consulta o aclaración, no dude en contactarnos.</p>
+                    </div>
+                    
+                    <div style="text-align: center; color: #666; font-size: 14px; border-top: 1px solid #eee; padding-top: 15px;">
+                        <p><strong>Sigma Cargo</strong><br>
+                        Email: mariel@sigmacargo.com.uy | martin@sigmacargo.com.uy</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            # Crear borrador
+            resultado = gmail_service.create_draft_with_attachments(
+                to_addresses=contact_info["emails"],
+                cc_addresses=contact_info.get("cc", []),
+                bcc_addresses=contact_info.get("bcc", []),
+                subject=asunto,
+                body=cuerpo_html,
+                attachment_paths=[Path(ruta_pdf)]
+            )
+            
+            if resultado["success"]:
+                return {
+                    "success": True,
+                    "message": mensaje_contacto + f" (ID: {resultado.get('draft_id', 'N/A')})"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": f"Error creando borrador para {nombre}: {resultado['message']}"
+                }
+                
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error procesando {nombre}: {e}"
+            }
 
 
 

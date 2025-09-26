@@ -1,4 +1,7 @@
 # representados.py
+# NOTA: Este archivo mantiene la lista original de códigos por compatibilidad,
+# pero se recomienda usar src.services.representados_contactos.list_codes() para obtener
+# la lista actualizada que incluye los contactos configurados.
 
 CODIGOS_REPRESENTADOS = [
     "888801015924", "888801015922", "888801015926", "888801015592", "888801015913", "888801015914",
@@ -30,3 +33,16 @@ CODIGOS_REPRESENTADOS = [
     "888805014526", "888801015778", "888801015789", "888801015825", "888801015780", "888801015800",
     "888801015799", "888801015812", "888801015798", "213460120012", "888801015603", "888801015979"
 ]
+
+# Helper functions para migrar gradualmente al nuevo sistema
+def get_codigos_representados():
+    """
+    Función helper para obtener códigos de representados.
+    Migra gradualmente al nuevo sistema de contactos.
+    """
+    try:
+        from src.services.representados_contactos import list_codes
+        return list_codes()
+    except ImportError:
+        # Fallback a la lista estática si el servicio no está disponible
+        return CODIGOS_REPRESENTADOS
