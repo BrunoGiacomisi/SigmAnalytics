@@ -5,6 +5,8 @@ Sistema de calculo, análisis y visualización de datos de manifiestos para SIGM
 ## 🚀 Características
 
 - **Carga y visualización de datos**: Mediante un excel genera gráficos (boxplot, barras, series temporales)
+- **Reportes PDF**: Generación de reportes individuales y masivos por representado
+- **Envío por Gmail**: Creación automática de borradores con reportes adjuntos
 - **Configuración**: Guardado automático de tamaño y posición de ventana
 - **Base de datos**: Almacenamiento de histórico de análisis en SQlite
 - **Validación**: Verificación automática de archivos y periodos
@@ -15,6 +17,7 @@ Sistema de calculo, análisis y visualización de datos de manifiestos para SIGM
 - Windows 10/11 (probado en Windows 10)
 - Dependencias listadas en `requirements.txt`
 - wkhtmltopdf 0.12.x (opcional; requerido para exportar a PDF)
+- Credenciales de Google Cloud (opcional; requerido para envío por Gmail)
 
 ## 📦 Ubicación de datos (Windows)
 
@@ -22,6 +25,8 @@ La aplicación guarda configuración, gráficos y base de datos en la carpeta de
 
 - Configuración: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\config.json`
 - Histórico (SQLite): `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\data\\historico\\historico.db`
+- Contactos: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\data\\contactos_representados.json`
+- Credenciales Gmail: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\auth\\`
 - Gráficos: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\outputs\\`
 
 Desde la app podés ver esta información con el botón "Datos" del dashboard.
@@ -40,6 +45,31 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
 - Definí una de estas variables apuntando al ejecutable:
   - `WKHTMLTOPDF_BINARY` o `WKHTMLTOPDF_PATH`
   - Ejemplo: `C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe`
+
+## 📧 Configuración Gmail (Opcional)
+
+Para habilitar el envío de reportes por Gmail:
+
+1. **Crear proyecto en Google Cloud Console**:
+
+   - Ir a [Google Cloud Console](https://console.cloud.google.com/)
+   - Crear nuevo proyecto o seleccionar existente
+   - Habilitar Gmail API
+
+2. **Configurar credenciales OAuth**:
+
+   - En "Credenciales", crear credenciales OAuth 2.0
+   - Tipo de aplicación: "Aplicación de escritorio"
+   - Descargar el archivo JSON de credenciales
+
+3. **Colocar credenciales**:
+
+   - Renombrar el archivo a `credentials.json`
+   - Colocarlo en: `C:\\Users\\<Usuario>\\AppData\\Local\\SigmAnalytics\\auth\\credentials.json`
+
+4. **Primera autorización**:
+   - Al usar la función por primera vez, se abrirá el navegador para autorizar la aplicación
+   - El token se guardará automáticamente para usos futuros
 
 ## 📊 Funcionalidades de Análisis
 
@@ -74,5 +104,7 @@ La exportación a PDF usa wkhtmltopdf (Windows recomendado, versión 0.12.x).
 - Jinja2 + pdfkit + wkhtmltopdf — renderizado de plantillas HTML y conversión a PDF para reportes por representado
 
 - TkinterWeb — previsualización embebida de HTML en la interfaz antes de exportar a PDF
+
+- Google APIs (gmail, auth-oauthlib) — integración con Gmail para envío automático de reportes como borradores
 
 - PyInstaller — creación de ejecutables distribuibles de la aplicación completa
